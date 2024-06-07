@@ -257,6 +257,71 @@ mjx-container[display="true"] + br {
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/06/07/json-csv%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/06/07/json-csv%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">json,csv解析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-06-07 23:48:57" itemprop="dateCreated datePublished" datetime="2024-06-07T23:48:57+08:00">2024-06-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-06-08 00:18:46" itemprop="dateModified" datetime="2024-06-08T00:18:46+08:00">2024-06-08</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="json"><a href="#json" class="headerlink" title="json"></a>json</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">void test_json()</span><br><span class="line">&#123;</span><br><span class="line">    //读取</span><br><span class="line">	std::ifstream file(&quot;test2.json&quot;);</span><br><span class="line">	if (!file.good())</span><br><span class="line">	&#123;</span><br><span class="line">		std::cout &lt;&lt; &quot;无法打开&quot; &lt;&lt; std::endl;</span><br><span class="line">		return;</span><br><span class="line">    &#125;</span><br><span class="line">	std::stringstream str_stream;</span><br><span class="line">	str_stream &lt;&lt; file.rdbuf();//rdbuf返回一个指向文件缓冲区的指针，将文件的内容读取到字符串流中，以便后续对字符串流进行处理或解析</span><br><span class="line">	file.close();</span><br><span class="line"></span><br><span class="line">    //输出</span><br><span class="line">	cJSON* json_root = cJSON_Parse(str_stream.str().c_str());//把字符串按json语法格式解析</span><br><span class="line"></span><br><span class="line">	cJSON* json_name = cJSON_GetObjectItem(json_root, &quot;name&quot;);</span><br><span class="line">	cJSON* json_age = cJSON_GetObjectItem(json_root, &quot;age&quot;);</span><br><span class="line">	cJSON* json_pets = cJSON_GetObjectItem(json_root, &quot;pets&quot;);</span><br><span class="line"></span><br><span class="line">	std::cout &lt;&lt; json_name-&gt;string &lt;&lt; &quot;:&quot; &lt;&lt; json_name-&gt;valuestring &lt;&lt; std::endl;</span><br><span class="line">	std::cout &lt;&lt; json_age-&gt;string &lt;&lt; &quot;:&quot; &lt;&lt; json_age-&gt;valueint &lt;&lt; std::endl;</span><br><span class="line">	std::cout &lt;&lt; json_pets-&gt;string &lt;&lt; &quot;:&quot; &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    //输出数组</span><br><span class="line">	cJSON* json_item = nullptr;//定义一个指针</span><br><span class="line">	cJSON_ArrayForEach(json_item, json_pets)//for循环</span><br><span class="line">	&#123;</span><br><span class="line">		std::cout &lt;&lt; &quot;\t&quot; &lt;&lt; json_item-&gt;valuestring &lt;&lt; std::endl;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="csv"><a href="#csv" class="headerlink" title="csv"></a>csv</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">void test_csv()</span><br><span class="line">&#123;</span><br><span class="line">	std::ifstream file(&quot;test.csv&quot;);</span><br><span class="line">	if (!file.good())</span><br><span class="line">	&#123;</span><br><span class="line">		std::cout &lt;&lt; &quot;无法打开&quot; &lt;&lt; std::endl;</span><br><span class="line">		return;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	std::string str_line;</span><br><span class="line">	while (std::getline(file, str_line))</span><br><span class="line">	&#123;</span><br><span class="line">		std::string str_grid;				            //单个字符</span><br><span class="line">		std::stringstream str_stream(str_line);	        //每一行字符</span><br><span class="line">		while (std::getline(str_stream, str_grid, &#x27;,&#x27;)) //读取数据时遇到逗号时会停止，并将分隔符之前的数据存储到str_grid中</span><br><span class="line">		&#123;</span><br><span class="line">			std::cout &lt;&lt; str_grid &lt;&lt; &quot; &quot;;</span><br><span class="line">		&#125;</span><br><span class="line">		std::cout &lt;&lt; std::endl;</span><br><span class="line">	&#125;</span><br><span class="line">	file.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://example.com/2024/06/04/%E6%95%B0%E5%AD%A6%E5%BB%BA%E6%A8%A1%E5%B8%B8%E7%94%A8%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -683,7 +748,7 @@ mjx-container[display="true"] + br {
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

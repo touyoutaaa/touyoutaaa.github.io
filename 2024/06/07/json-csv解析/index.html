@@ -20,19 +20,19 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="作者编程小白，这个博客记录自己的学习经历，同时也可以做为一个恋爱日志（如果有可能的话）。">
+  <meta name="description" content="json12345678910111213141516171819202122232425262728293031void test_json()&#123;    &#x2F;&#x2F;读取	std::ifstream file(&quot;test2.json&quot;);	if (!file.good())	&#123;		std::cout &lt;&lt; &quot;无法打开&quot; &lt;&amp;l">
 <meta property="og:type" content="article">
-<meta property="og:title" content="关于这个博客">
-<meta property="og:url" content="http://example.com/2024/05/30/%E5%85%B3%E4%BA%8E%E8%BF%99%E4%B8%AA%E5%8D%9A%E5%AE%A2-1/index.html">
+<meta property="og:title" content="json,csv解析">
+<meta property="og:url" content="http://example.com/2024/06/07/json-csv%E8%A7%A3%E6%9E%90/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="作者编程小白，这个博客记录自己的学习经历，同时也可以做为一个恋爱日志（如果有可能的话）。">
+<meta property="og:description" content="json12345678910111213141516171819202122232425262728293031void test_json()&#123;    &#x2F;&#x2F;读取	std::ifstream file(&quot;test2.json&quot;);	if (!file.good())	&#123;		std::cout &lt;&lt; &quot;无法打开&quot; &lt;&amp;l">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2024-05-30T07:45:53.000Z">
-<meta property="article:modified_time" content="2024-06-04T17:09:38.367Z">
+<meta property="article:published_time" content="2024-06-07T15:48:57.000Z">
+<meta property="article:modified_time" content="2024-06-07T16:18:46.070Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/2024/05/30/%E5%85%B3%E4%BA%8E%E8%BF%99%E4%B8%AA%E5%8D%9A%E5%AE%A2-1/">
+<link rel="canonical" href="http://example.com/2024/06/07/json-csv%E8%A7%A3%E6%9E%90/">
 
 
 <script id="page-configurations">
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>关于这个博客 | Hexo</title>
+  <title>json,csv解析 | Hexo</title>
   
 
 
@@ -76,119 +76,7 @@
   </style>
 </noscript>
 
-<style>mjx-container[jax="SVG"] {
-  direction: ltr;
-}
-
-mjx-container[jax="SVG"] > svg {
-  overflow: visible;
-}
-
-mjx-container[jax="SVG"][display="true"] {
-  display: block;
-  text-align: center;
-  margin: 1em 0;
-}
-
-mjx-container[jax="SVG"][justify="left"] {
-  text-align: left;
-}
-
-mjx-container[jax="SVG"][justify="right"] {
-  text-align: right;
-}
-
-g[data-mml-node="merror"] > g {
-  fill: red;
-  stroke: red;
-}
-
-g[data-mml-node="merror"] > rect[data-background] {
-  fill: yellow;
-  stroke: none;
-}
-
-g[data-mml-node="mtable"] > line[data-line] {
-  stroke-width: 70px;
-  fill: none;
-}
-
-g[data-mml-node="mtable"] > rect[data-frame] {
-  stroke-width: 70px;
-  fill: none;
-}
-
-g[data-mml-node="mtable"] > .mjx-dashed {
-  stroke-dasharray: 140;
-}
-
-g[data-mml-node="mtable"] > .mjx-dotted {
-  stroke-linecap: round;
-  stroke-dasharray: 0,140;
-}
-
-g[data-mml-node="mtable"] > svg {
-  overflow: visible;
-}
-
-[jax="SVG"] mjx-tool {
-  display: inline-block;
-  position: relative;
-  width: 0;
-  height: 0;
-}
-
-[jax="SVG"] mjx-tool > mjx-tip {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-mjx-tool > mjx-tip {
-  display: inline-block;
-  padding: .2em;
-  border: 1px solid #888;
-  font-size: 70%;
-  background-color: #F8F8F8;
-  color: black;
-  box-shadow: 2px 2px 5px #AAAAAA;
-}
-
-g[data-mml-node="maction"][data-toggle] {
-  cursor: pointer;
-}
-
-mjx-status {
-  display: block;
-  position: fixed;
-  left: 1em;
-  bottom: 1em;
-  min-width: 25%;
-  padding: .2em .4em;
-  border: 1px solid #888;
-  font-size: 90%;
-  background-color: #F8F8F8;
-  color: black;
-}
-
-foreignObject[data-mjx-xml] {
-  font-family: initial;
-  line-height: normal;
-  overflow: visible;
-}
-
-.MathJax path {
-  stroke-width: 3;
-}
-
-mjx-container[display="true"] {
-  overflow: auto hidden;
-}
-
-mjx-container[display="true"] + br {
-  display: none;
-}
-</style></head>
+</head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
   <div class="container use-motion">
@@ -262,7 +150,7 @@ mjx-container[display="true"] + br {
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/05/30/%E5%85%B3%E4%BA%8E%E8%BF%99%E4%B8%AA%E5%8D%9A%E5%AE%A2-1/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/06/07/json-csv%E8%A7%A3%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -275,7 +163,7 @@ mjx-container[display="true"] + br {
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          关于这个博客
+          json,csv解析
         </h1>
 
         <div class="post-meta">
@@ -285,14 +173,14 @@ mjx-container[display="true"] + br {
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2024-05-30 15:45:53" itemprop="dateCreated datePublished" datetime="2024-05-30T15:45:53+08:00">2024-05-30</time>
+              <time title="Created: 2024-06-07 23:48:57" itemprop="dateCreated datePublished" datetime="2024-06-07T23:48:57+08:00">2024-06-07</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2024-06-05 01:09:38" itemprop="dateModified" datetime="2024-06-05T01:09:38+08:00">2024-06-05</time>
+                <time title="Modified: 2024-06-08 00:18:46" itemprop="dateModified" datetime="2024-06-08T00:18:46+08:00">2024-06-08</time>
               </span>
 
           
@@ -306,11 +194,8 @@ mjx-container[display="true"] + br {
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="作者"><a href="#作者" class="headerlink" title="作者"></a>作者</h1><p>编程小白，这个博客记录自己的<strong>学习经历</strong>，同时也可以做为一个<strong>恋爱日志</strong>（如果有可能的话）。</p>
-<span id="more"></span>
-<h1 id="如果你想了解我"><a href="#如果你想了解我" class="headerlink" title="如果你想了解我"></a>如果你想了解我</h1><p>请添加<strong>qq:1849625991</strong></p>
-<h1 id="特别鸣谢"><a href="#特别鸣谢" class="headerlink" title="特别鸣谢"></a>特别鸣谢</h1><p>b站up主<strong>voidmartix</strong>，大V老师可以说是这个博客的缔造者之一，是他给了我这个想法。</p>
-
+        <h1 id="json"><a href="#json" class="headerlink" title="json"></a>json</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">void test_json()</span><br><span class="line">&#123;</span><br><span class="line">    //读取</span><br><span class="line">	std::ifstream file(&quot;test2.json&quot;);</span><br><span class="line">	if (!file.good())</span><br><span class="line">	&#123;</span><br><span class="line">		std::cout &lt;&lt; &quot;无法打开&quot; &lt;&lt; std::endl;</span><br><span class="line">		return;</span><br><span class="line">    &#125;</span><br><span class="line">	std::stringstream str_stream;</span><br><span class="line">	str_stream &lt;&lt; file.rdbuf();//rdbuf返回一个指向文件缓冲区的指针，将文件的内容读取到字符串流中，以便后续对字符串流进行处理或解析</span><br><span class="line">	file.close();</span><br><span class="line"></span><br><span class="line">    //输出</span><br><span class="line">	cJSON* json_root = cJSON_Parse(str_stream.str().c_str());//把字符串按json语法格式解析</span><br><span class="line"></span><br><span class="line">	cJSON* json_name = cJSON_GetObjectItem(json_root, &quot;name&quot;);</span><br><span class="line">	cJSON* json_age = cJSON_GetObjectItem(json_root, &quot;age&quot;);</span><br><span class="line">	cJSON* json_pets = cJSON_GetObjectItem(json_root, &quot;pets&quot;);</span><br><span class="line"></span><br><span class="line">	std::cout &lt;&lt; json_name-&gt;string &lt;&lt; &quot;:&quot; &lt;&lt; json_name-&gt;valuestring &lt;&lt; std::endl;</span><br><span class="line">	std::cout &lt;&lt; json_age-&gt;string &lt;&lt; &quot;:&quot; &lt;&lt; json_age-&gt;valueint &lt;&lt; std::endl;</span><br><span class="line">	std::cout &lt;&lt; json_pets-&gt;string &lt;&lt; &quot;:&quot; &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    //输出数组</span><br><span class="line">	cJSON* json_item = nullptr;//定义一个指针</span><br><span class="line">	cJSON_ArrayForEach(json_item, json_pets)//for循环</span><br><span class="line">	&#123;</span><br><span class="line">		std::cout &lt;&lt; &quot;\t&quot; &lt;&lt; json_item-&gt;valuestring &lt;&lt; std::endl;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="csv"><a href="#csv" class="headerlink" title="csv"></a>csv</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">void test_csv()</span><br><span class="line">&#123;</span><br><span class="line">	std::ifstream file(&quot;test.csv&quot;);</span><br><span class="line">	if (!file.good())</span><br><span class="line">	&#123;</span><br><span class="line">		std::cout &lt;&lt; &quot;无法打开&quot; &lt;&lt; std::endl;</span><br><span class="line">		return;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	std::string str_line;</span><br><span class="line">	while (std::getline(file, str_line))</span><br><span class="line">	&#123;</span><br><span class="line">		std::string str_grid;				            //单个字符</span><br><span class="line">		std::stringstream str_stream(str_line);	        //每一行字符</span><br><span class="line">		while (std::getline(str_stream, str_grid, &#x27;,&#x27;)) //读取数据时遇到逗号时会停止，并将分隔符之前的数据存储到str_grid中</span><br><span class="line">		&#123;</span><br><span class="line">			std::cout &lt;&lt; str_grid &lt;&lt; &quot; &quot;;</span><br><span class="line">		&#125;</span><br><span class="line">		std::cout &lt;&lt; std::endl;</span><br><span class="line">	&#125;</span><br><span class="line">	file.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -324,11 +209,11 @@ mjx-container[display="true"] + br {
 
         
     <div class="post-nav">
-      <div class="post-nav-item"></div>
       <div class="post-nav-item">
-    <a href="/2024/06/02/Boids%E9%9B%86%E7%BE%A4%E7%AE%97%E6%B3%95/" rel="next" title="Boids集群算法">
-      Boids集群算法 <i class="fa fa-chevron-right"></i>
+    <a href="/2024/06/04/%E6%95%B0%E5%AD%A6%E5%BB%BA%E6%A8%A1%E5%B8%B8%E7%94%A8%E7%AE%97%E6%B3%95/" rel="prev" title="数学建模常用算法">
+      <i class="fa fa-chevron-left"></i> 数学建模常用算法
     </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -387,7 +272,7 @@ mjx-container[display="true"] + br {
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%9C%E8%80%85"><span class="nav-number">1.</span> <span class="nav-text">作者</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E4%BD%A0%E6%83%B3%E4%BA%86%E8%A7%A3%E6%88%91"><span class="nav-number">2.</span> <span class="nav-text">如果你想了解我</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%B9%E5%88%AB%E9%B8%A3%E8%B0%A2"><span class="nav-number">3.</span> <span class="nav-text">特别鸣谢</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#json"><span class="nav-number">1.</span> <span class="nav-text">json</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#csv"><span class="nav-number">2.</span> <span class="nav-text">csv</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -488,61 +373,6 @@ mjx-container[display="true"] + br {
   
 
   
-      
-
-<script>
-  if (typeof MathJax === 'undefined') {
-    window.MathJax = {
-      loader: {
-          load: ['[tex]/mhchem'],
-        source: {
-          '[tex]/amsCd': '[tex]/amscd',
-          '[tex]/AMScd': '[tex]/amscd'
-        }
-      },
-      tex: {
-        inlineMath: {'[+]': [['$', '$']]},
-          packages: {'[+]': ['mhchem']},
-        tags: 'ams'
-      },
-      options: {
-        renderActions: {
-          findScript: [10, doc => {
-            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
-              const display = !!node.type.match(/; *mode=display/);
-              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
-              const text = document.createTextNode('');
-              node.parentNode.replaceChild(text, node);
-              math.start = {node: text, delim: '', n: 0};
-              math.end = {node: text, delim: '', n: 0};
-              doc.math.push(math);
-            });
-          }, '', false],
-          insertedScript: [200, () => {
-            document.querySelectorAll('mjx-container').forEach(node => {
-              let target = node.parentNode;
-              if (target.nodeName.toLowerCase() === 'li') {
-                target.parentNode.classList.add('has-jax');
-              }
-            });
-          }, '', false]
-        }
-      }
-    };
-    (function () {
-      var script = document.createElement('script');
-      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
-      script.defer = true;
-      document.head.appendChild(script);
-    })();
-  } else {
-    MathJax.startup.document.state(0);
-    MathJax.texReset();
-    MathJax.typeset();
-  }
-</script>
-
-    
 
   
 
