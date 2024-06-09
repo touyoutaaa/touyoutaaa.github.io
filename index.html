@@ -292,7 +292,7 @@ mjx-container[display="true"] + br {
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-06-09 20:51:48 / 修改时间：21:11:41" itemprop="dateCreated datePublished" datetime="2024-06-09T20:51:48+08:00">2024-06-09</time>
+              <time title="创建时间：2024-06-09 20:51:48 / 修改时间：21:16:58" itemprop="dateCreated datePublished" datetime="2024-06-09T20:51:48+08:00">2024-06-09</time>
             </span>
 
           
@@ -306,10 +306,15 @@ mjx-container[display="true"] + br {
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><strong>父类</strong><br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">template&lt;typename T&gt;</span><br><span class="line">class Manager</span><br><span class="line">&#123;</span><br><span class="line">public:</span><br><span class="line">	//可继承单例模板</span><br><span class="line">	static T* instance()//返回具体Manager指针,而不是基类指针</span><br><span class="line">	&#123;</span><br><span class="line">		if (!manager)</span><br><span class="line">			manager = new T();</span><br><span class="line">		return manager;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">private:</span><br><span class="line">	static T* manager;//实例化具体子类的对象</span><br><span class="line"></span><br><span class="line">protected:</span><br><span class="line">	//避免在程序外部(类外)有多个实例</span><br><span class="line">	Manager() = default;</span><br><span class="line">	~Manager() = default;</span><br><span class="line">	Manager(const Manager&amp;) = delete;//删除拷贝构造函数</span><br><span class="line">	Manager&amp; operator=(const Manager&amp;) = delete;//删除拷贝运算符</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">template&lt;typename T&gt;</span><br><span class="line">T* Manager&lt;T&gt;::manager = nullptr;//对第21行manager的定义,初始化成空指针</span><br><span class="line"></span><br></pre></td></tr></table></figure><br><strong>子类</strong><br>class GameManager :public Manager<GameManager><br>{<br>    friend class Manager<GameManager>;//父类要访问子类protected里的内容<br>    //要想构造一个子类,需要调用父类中的instance()函数,而instance()中需要new T(),<br>    //由于子类的构造函数是protected所以需要将父类声明成友元,让其能访问构造函数</p>
-<p>public:<br>    int run(int argc, char** argv){}</p>
-<p>protected:<br>    GameManager(){}<br>    ~GameManager(){}<br>private:<br>};<br><strong>主循环</strong><br>int main(int argc,char** argv)<br>{<br>    return GameManager::instance()-&gt;run(argc, argv);//此时初始化一个GameManager要用instance()方法,调用子类中的run()<br>}</p>
-
+          <p>用instance()方法初始化,禁用构造，析构函数<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/06/09/%E5%8D%95%E4%BE%8B%E5%8F%AF%E7%BB%A7%E6%89%BF%E6%A8%A1%E6%9D%BF%E7%B1%BB/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
