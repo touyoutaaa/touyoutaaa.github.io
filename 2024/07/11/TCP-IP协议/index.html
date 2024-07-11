@@ -20,18 +20,19 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="TCP&#x2F;IP协议初学">
+  <meta name="description" content="TCP&#x2F;IP协议初学https:&#x2F;&#x2F;www.cnblogs.com&#x2F;crazymakercircle&#x2F;p&#x2F;14499211.html">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TCP&#x2F;IP协议">
 <meta property="og:url" content="http://example.com/2024/07/11/TCP-IP%E5%8D%8F%E8%AE%AE/index.html">
 <meta property="og:site_name" content="HJX的博客栈">
-<meta property="og:description" content="TCP&#x2F;IP协议初学">
+<meta property="og:description" content="TCP&#x2F;IP协议初学https:&#x2F;&#x2F;www.cnblogs.com&#x2F;crazymakercircle&#x2F;p&#x2F;14499211.html">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://s2.loli.net/2024/07/11/3XSeP9AZstv7rj6.png">
 <meta property="og:image" content="https://s2.loli.net/2024/07/11/YT812EtzPsglMGR.png">
 <meta property="og:image" content="https://s2.loli.net/2024/07/11/xQWDSUY91oerjCO.png">
+<meta property="og:image" content="https://s2.loli.net/2024/07/11/GiBDMLQyv4x3PWn.png">
 <meta property="article:published_time" content="2024-07-11T08:13:44.000Z">
-<meta property="article:modified_time" content="2024-07-11T09:30:13.614Z">
+<meta property="article:modified_time" content="2024-07-11T11:08:26.664Z">
 <meta property="article:author" content="HJX">
 <meta property="article:tag" content="计算机网络">
 <meta name="twitter:card" content="summary">
@@ -189,7 +190,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-07-11 16:13:44 / 修改时间：17:30:13" itemprop="dateCreated datePublished" datetime="2024-07-11T16:13:44+08:00">2024-07-11</time>
+              <time title="创建时间：2024-07-11 16:13:44 / 修改时间：19:08:26" itemprop="dateCreated datePublished" datetime="2024-07-11T16:13:44+08:00">2024-07-11</time>
             </span>
 
           
@@ -203,9 +204,22 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>TCP/IP协议初学<br><span id="more"></span><br>首先，我们需要了解三张表，以及它们储存的内容。<br><strong>1.MAC表</strong><br>MAC表主要用于记录交换机的各个端口上连接的设备的MAC地址，以便正确地将数据帧从一个端口转发到另一个端口。也就是说MAC表是交换机特有的，它所储存的是MAC地址与端口的映射。<br><img src="https://s2.loli.net/2024/07/11/3XSeP9AZstv7rj6.png" alt=" MAC"><br><strong>数据帧过来了-&gt;交换机查MAC表-&gt;找到端口传过去</strong></p>
+        <p>TCP/IP协议初学<a target="_blank" rel="noopener" href="https://www.cnblogs.com/crazymakercircle/p/14499211.html">https://www.cnblogs.com/crazymakercircle/p/14499211.html</a><br><span id="more"></span><br>首先，我们需要了解三张表，以及它们储存的内容。<br><strong>1.MAC表</strong><br>MAC表主要用于记录交换机的各个端口上连接的设备的MAC地址，以便正确地将数据帧从一个端口转发到另一个端口。也就是说MAC表是交换机特有的，它所储存的是MAC地址与端口的映射。<br><img src="https://s2.loli.net/2024/07/11/3XSeP9AZstv7rj6.png" alt=" MAC"><br><strong>数据帧过来了-&gt;交换机查MAC表-&gt;找到端口传过去</strong></p>
 <p><strong>2.路由表</strong><br>路由表记录了网络设备所知道的网络拓扑结构信息，包括如何到达不同网络或主机的路径信息。这些路径信息指导设备在收到数据包时如何选择合适的下一跳路由器或出接口进行转发。(值得注意的是：路由表的信息通常由网络管理员手动配置或者通过路由协议自动学习得到。)<br><img src="https://s2.loli.net/2024/07/11/YT812EtzPsglMGR.png" alt=" 路由表1"><br><img src="https://s2.loli.net/2024/07/11/xQWDSUY91oerjCO.png" alt=" 路由表2"><br><strong>数据帧通过默认网关到达路由器-&gt;路由器查看路由表-&gt;通过目标地址找到端口传过去</strong><br>但是，我们知道传递数据帧必须要知道MAC地址，怎么通过IP地址，推出MAC地址呢？答案是arp表。<br><strong>下一跳</strong>：路由表中的每一条记录都会包含一个指向下一跳的信息，当设备根据目的IP地址查找到匹配的路由表记录时，会根据该记录中指定的下一跳信息来决定将数据包发送到哪个设备或接口。</p>
-<p><strong>3.ARP表</strong><br>ARP表记录了本地网络中每个IP地址对应的MAC地址，以及它们之间的关联。<br>ARP表的填充过程通常由ARP协议自动完成。当设备需要将数据包发送到另一个设备时，它会首先查看本地的ARP表，看是否已经有目标IP地址对应的MAC地址映射记录。如果有，设备可以直接使用这个MAC地址来封装数据包并发送；如果没有，设备会发送一个ARP请求广播，请求网络中的其他设备告知它们的MAC地址。收到这个请求的设备会回复一个ARP响应，包含自己的MAC地址。收到响应后，设备会将这个新的IP地址与MAC地址的映射关系添加到ARP表中，并使用这个MAC地址进行后续的数据包转发。<br><strong>需要某个设备的MAC地址-&gt;ARP表中是否已经有MAC地址了?直接发送:发送请求广播-&gt;将获取的内容添加到ARP表,再发送</strong></p>
+<p><strong>3.ARP表</strong><br>ARP表记录了本地网络中每个IP地址对应的MAC地址，以及它们之间的关联。<br>ARP表的填充过程通常由ARP协议自动完成。当设备需要将数据包发送到另一个设备时，它会首先查看本地的ARP表，看是否已经有目标IP地址对应的MAC地址映射记录。如果有，设备可以直接使用这个MAC地址来封装数据包并发送；如果没有，设备会发送一个ARP请求广播，请求网络中的其他设备告知它们的MAC地址。收到这个请求的设备会回复一个ARP响应，包含自己的MAC地址。收到响应后，设备会将这个新的IP地址与MAC地址的映射关系添加到ARP表中，并使用这个MAC地址进行后续的数据包转发。<br><strong>需要某个设备的MAC地址-&gt;ARP表中是否已经有需要的MAC地址了?直接发送:发送请求广播-&gt;将获取的内容添加到ARP表,再发送</strong></p>
+<p><strong>4.下面看一个实例</strong><br><img src="https://s2.loli.net/2024/07/11/GiBDMLQyv4x3PWn.png" alt=" 实例"><br><strong>从A发送数据到F</strong></p>
+<ol>
+<li>首先A（192.168.0.1）通过子网掩码（255.255.255.0）计算出自己与F（192.168.2.2）并不在同一个子网内，于是决定发送给默认网关（192.168.0.254）。</li>
+<li>A 通过ARP找到默认网关192.168.0.254的MAC地址。</li>
+<li>A 将源MAC地址（AAAA）与网关MAC地址（ABAB）封装在数据链路层头部，又将 IP地址（192.168.0.1）和目的 P地址（192.168.2.2）（注意这里千万不要以为填写的是默认网关的IP地址，从始至终这个数据包的两个IP地址都是不变的，只有MAC地址在不断变化）封装在网络层头部，然后发包。</li>
+<li>交换机1收到数据包后，发现目标 MAC 地址是 ABAB，转发给路由器1</li>
+<li>数据包来到了路由器1，发现其目标IP地址是 192.168.2.2，查看其路由表，发现了下一跳的地址是192.168.100.5</li>
+<li>所以此时路由器1需要做两件事，第一件是再次匹配路由表，发现匹配到了端口为2，于是将其封装到数据链路层，最后把包从 2 号口发出去。</li>
+<li>此时路由器2收到了数据包，看到其目的地址是 192.168.2.2，查询其路由表，匹配到端口号为1，准备从1号口把数据包送出去。</li>
+<li>但此时路由器2需要知道 192.168.2.2 的 MAC 地址了，于是查看arp缓存，找到其MAC地址为FFFF，将其封装在数据链路层头部，并从1号端口把包发出去。</li>
+<li>交换机 3 收到了数据包，发现目的MAC地址为FFFF，查询其 MAC 地址表，发现应该从其 6 号端口出去，于是从 6 号端口把数据包发出去。</li>
+<li>F 最终收到了数据包！并且发现目的MAC地址就是自己,于是收下了这个包。</li>
+</ol>
 
     </div>
 
