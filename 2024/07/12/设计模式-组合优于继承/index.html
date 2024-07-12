@@ -20,20 +20,27 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="用instance()方法初始化,禁用构造，析构函数">
+  <meta name="description" content="子曰:”面向接口进行开发，而不是面向实现；依赖于抽象类型，而不是具体类。”">
 <meta property="og:type" content="article">
-<meta property="og:title" content="单例可继承模板类">
-<meta property="og:url" content="http://example.com/2024/06/09/%E5%8D%95%E4%BE%8B%E5%8F%AF%E7%BB%A7%E6%89%BF%E6%A8%A1%E6%9D%BF%E7%B1%BB/index.html">
+<meta property="og:title" content="设计模式&#x2F;组合优于继承">
+<meta property="og:url" content="http://example.com/2024/07/12/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%84%E5%90%88%E4%BC%98%E4%BA%8E%E7%BB%A7%E6%89%BF/index.html">
 <meta property="og:site_name" content="HJX的博客栈">
-<meta property="og:description" content="用instance()方法初始化,禁用构造，析构函数">
+<meta property="og:description" content="子曰:”面向接口进行开发，而不是面向实现；依赖于抽象类型，而不是具体类。”">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-06-09T12:51:48.000Z">
-<meta property="article:modified_time" content="2024-06-10T08:16:54.433Z">
+<meta property="og:image" content="https://s2.loli.net/2024/07/12/YaeoWSIDVXf2kGR.png">
+<meta property="og:image" content="https://s2.loli.net/2024/07/12/ZIeUSuV4PAGEbfg.png">
+<meta property="og:image" content="https://s2.loli.net/2024/07/12/NUgamj4BRdkl3Ou.png">
+<meta property="og:image" content="https://s2.loli.net/2024/07/12/xo4j71ZJBL5DkyE.png">
+<meta property="og:image" content="https://s2.loli.net/2024/07/12/k2PKiDVrZ8oOI9l.png">
+<meta property="og:image" content="https://s2.loli.net/2024/07/12/YV5DgH7jEAIl8GM.png">
+<meta property="article:published_time" content="2024-07-12T06:21:54.000Z">
+<meta property="article:modified_time" content="2024-07-12T08:28:26.157Z">
 <meta property="article:author" content="HJX">
-<meta property="article:tag" content="Tdgame">
+<meta property="article:tag" content="设计模式">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2024/07/12/YaeoWSIDVXf2kGR.png">
 
-<link rel="canonical" href="http://example.com/2024/06/09/%E5%8D%95%E4%BE%8B%E5%8F%AF%E7%BB%A7%E6%89%BF%E6%A8%A1%E6%9D%BF%E7%B1%BB/">
+<link rel="canonical" href="http://example.com/2024/07/12/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%84%E5%90%88%E4%BC%98%E4%BA%8E%E7%BB%A7%E6%89%BF/">
 
 
 <script id="page-configurations">
@@ -46,7 +53,7 @@
   };
 </script>
 
-  <title>单例可继承模板类 | HJX的博客栈</title>
+  <title>设计模式/组合优于继承 | HJX的博客栈</title>
   
 
 
@@ -161,7 +168,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/06/09/%E5%8D%95%E4%BE%8B%E5%8F%AF%E7%BB%A7%E6%89%BF%E6%A8%A1%E6%9D%BF%E7%B1%BB/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/07/12/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%84%E5%90%88%E4%BC%98%E4%BA%8E%E7%BB%A7%E6%89%BF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/zwz.jpg">
@@ -174,7 +181,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          单例可继承模板类
+          设计模式/组合优于继承
         </h1>
 
         <div class="post-meta">
@@ -183,16 +190,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2024-06-09 20:51:48" itemprop="dateCreated datePublished" datetime="2024-06-09T20:51:48+08:00">2024-06-09</time>
+              <time title="创建时间：2024-07-12 14:21:54 / 修改时间：16:28:26" itemprop="dateCreated datePublished" datetime="2024-07-12T14:21:54+08:00">2024-07-12</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-06-10 16:16:54" itemprop="dateModified" datetime="2024-06-10T16:16:54+08:00">2024-06-10</time>
-              </span>
 
           
 
@@ -205,7 +206,14 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>用instance()方法初始化,禁用构造，析构函数<br><span id="more"></span><br><strong>父类</strong><br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Manager</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="comment">//可继承单例模板</span></span><br><span class="line">	<span class="function"><span class="type">static</span> T* <span class="title">instance</span><span class="params">()</span><span class="comment">//返回具体Manager指针,而不是基类指针</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (!manager)</span><br><span class="line">			manager = <span class="keyword">new</span> <span class="built_in">T</span>();</span><br><span class="line">		<span class="keyword">return</span> manager;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="type">static</span> T* manager;<span class="comment">//实例化具体子类的对象</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="comment">//避免在程序外部(类外)有多个实例</span></span><br><span class="line">	<span class="built_in">Manager</span>() = <span class="keyword">default</span>;</span><br><span class="line">	~<span class="built_in">Manager</span>() = <span class="keyword">default</span>;</span><br><span class="line">	<span class="built_in">Manager</span>(<span class="type">const</span> Manager&amp;) = <span class="keyword">delete</span>;<span class="comment">//删除拷贝构造函数</span></span><br><span class="line">	Manager&amp; <span class="keyword">operator</span>=(<span class="type">const</span> Manager&amp;) = <span class="keyword">delete</span>;<span class="comment">//删除拷贝运算符</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">T* Manager&lt;T&gt;::manager = <span class="literal">nullptr</span>;<span class="comment">//对第21行manager的定义,初始化成空指针</span></span><br></pre></td></tr></table></figure><br><strong>子类</strong><br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">GameManager</span> :<span class="keyword">public</span> Manager&lt;GameManager&gt;</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">Manager</span>&lt;GameManager&gt;;<span class="comment">//父类要访问子类protected里的内容</span></span><br><span class="line">	<span class="comment">//要想构造一个子类,需要调用父类中的instance()函数,而instance()中需要new T(),</span></span><br><span class="line">	<span class="comment">//由于子类的构造函数是protected所以需要将父类声明成友元,让其能访问构造函数</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="function"><span class="type">int</span> <span class="title">run</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="built_in">GameManager</span>()&#123;&#125;</span><br><span class="line">	~<span class="built_in">GameManager</span>()&#123;&#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure><br><strong>主循环</strong><br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span>** argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> GameManager::<span class="built_in">instance</span>()-&gt;<span class="built_in">run</span>(argc, argv);<span class="comment">//此时初始化一个GameManager要用instance()方法,调用子类中的run()</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        <p>子曰:”面向接口进行开发，而不是面向实现；依赖于抽象类型，而不是具体类。”<br><span id="more"></span><br>0.前置知识(UML图)<br>0.1 依赖(教授——&gt;课程，教授依赖于课程资料):如果修改一个类的定义可能会造成另一个类的变化，那么这两个类之间就存在依赖关系。(在一个类中调用另一个类)。<strong>对类 B 进行修改会影响到类 A 。</strong></p>
+<p>0.2 关联(教授====&gt;学生，教授与学生进行交流)：<br>关联可视为一种特殊类型的依赖，即一个对象总是拥有访问与其交互的对象的权限，而简单的依赖关系并不会在对象间建立永久性的联系。<strong>对象 A 知道对象 B。类 A 依赖于类 B。</strong></p>
+<p>0.3 聚合(院系&lt;&gt;====教授，院系包含教授，还有其他的东西)：<br>在聚合关系中，一个对象<strong>拥有</strong>一组其他对象，并扮演着容器或集合的角色。<strong>组件可以独立于容器存在</strong>，也可以同时连接多个容器。<strong>对象 A 知道对象 B 且由 B 构成。类 A 依赖于类 B。</strong></p>
+<p>0.4 组合(大学&lt;=&gt;====院系,大学由院系构成,院系不能脱离大学而存在)：<br>组合是一种特殊类型的聚合，其中一个对象由一个或多个其他对象实例构成。组合与其他关系的区别在于<strong>组件仅能作为容器的一部分存在。对象 A 知道对象 B、由 B 构成而且管理着 B 的生命周期。类 A 依赖于类 B。</strong><br><img src="https://s2.loli.net/2024/07/12/YaeoWSIDVXf2kGR.png" alt=" 关系图"></p>
+<p>0.5 设计模式分类<br><strong>创建型模式</strong>：提供创建对象的机制，增加已有代码的灵活性和可复用性。<br><strong>结构型模式</strong>：介绍如何将对象和类组装成较大的结构，并同时保持结构的灵活和高效。<br><strong>行为模式</strong>：负责对象间的高效沟通和职责委派。</p>
+<p>下面有一个例子，解释了为什么子曰：”通过接口与对象交互要比依赖于其具体类的好处更多。”<br><img src="https://s2.loli.net/2024/07/12/ZIeUSuV4PAGEbfg.png" alt=" 1"><br><img src="https://s2.loli.net/2024/07/12/NUgamj4BRdkl3Ou.png" alt=" 2"><br><img src="https://s2.loli.net/2024/07/12/xo4j71ZJBL5DkyE.png" alt=" 3"><br>这个过程是一个不断解耦合的过程，刚开始所有类紧密耦合，代码复用性极差。之后采用了多态的方法，但是<strong>公司</strong>的某些方法(createsoftware())仍然依赖于具体的<strong>员工</strong>。于是，我们又提供了一个<strong>getemployee()</strong>的接口,雇员对象将在具体公司子类中创建。这下公司基类彻底与员工解耦合了。</p>
+<p>1.组合优于继承<br>组合是代替继承的一种方法。继承-&gt;(汽车<strong>是</strong>交通工具)，组合-&gt;(汽车<strong>有</strong>一个引擎).<br>下面看一个实例<br><img src="https://s2.loli.net/2024/07/12/k2PKiDVrZ8oOI9l.png" alt=" 4"><br>在多个维度上扩展一个类（汽车类型X引擎类型X驾驶类型)可能导致子类组合爆炸。</p>
+<p>这时，我们需要用到组合：将不同“维度”的功能抽取到各自的类层次结构中。<br><img src="https://s2.loli.net/2024/07/12/YV5DgH7jEAIl8GM.png" alt=" 5"></p>
 
     </div>
 
@@ -215,7 +223,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Tdgame/" rel="tag"># Tdgame</a>
+              <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag"># 设计模式</a>
           </div>
 
         
@@ -224,13 +232,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/06/07/json-csv%E8%A7%A3%E6%9E%90/" rel="prev" title="json,csv解析">
-      <i class="fa fa-chevron-left"></i> json,csv解析
+    <a href="/2024/07/11/TCP-IP%E5%8D%8F%E8%AE%AE/" rel="prev" title="TCP/IP协议">
+      <i class="fa fa-chevron-left"></i> TCP/IP协议
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/07/06/%E8%9A%81%E7%BE%A4%E7%AE%97%E6%B3%95/" rel="next" title="蚁群算法">
-      蚁群算法 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
