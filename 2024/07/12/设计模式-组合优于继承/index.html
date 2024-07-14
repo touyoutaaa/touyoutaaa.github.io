@@ -22,7 +22,7 @@
 
   <meta name="description" content="子曰:”面向接口进行开发，而不是面向实现；依赖于抽象类型，而不是具体类。”">
 <meta property="og:type" content="article">
-<meta property="og:title" content="设计模式&#x2F;组合优于继承">
+<meta property="og:title" content="设计模式-1">
 <meta property="og:url" content="http://example.com/2024/07/12/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%84%E5%90%88%E4%BC%98%E4%BA%8E%E7%BB%A7%E6%89%BF/index.html">
 <meta property="og:site_name" content="HJX的博客栈">
 <meta property="og:description" content="子曰:”面向接口进行开发，而不是面向实现；依赖于抽象类型，而不是具体类。”">
@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://s2.loli.net/2024/07/12/k2PKiDVrZ8oOI9l.png">
 <meta property="og:image" content="https://s2.loli.net/2024/07/12/YV5DgH7jEAIl8GM.png">
 <meta property="article:published_time" content="2024-07-12T06:21:54.000Z">
-<meta property="article:modified_time" content="2024-07-12T08:28:26.157Z">
+<meta property="article:modified_time" content="2024-07-12T09:02:21.806Z">
 <meta property="article:author" content="HJX">
 <meta property="article:tag" content="设计模式">
 <meta name="twitter:card" content="summary">
@@ -53,7 +53,7 @@
   };
 </script>
 
-  <title>设计模式/组合优于继承 | HJX的博客栈</title>
+  <title>设计模式-1 | HJX的博客栈</title>
   
 
 
@@ -181,7 +181,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          设计模式/组合优于继承
+          设计模式-1
         </h1>
 
         <div class="post-meta">
@@ -192,7 +192,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-07-12 14:21:54 / 修改时间：16:28:26" itemprop="dateCreated datePublished" datetime="2024-07-12T14:21:54+08:00">2024-07-12</time>
+              <time title="创建时间：2024-07-12 14:21:54 / 修改时间：17:02:21" itemprop="dateCreated datePublished" datetime="2024-07-12T14:21:54+08:00">2024-07-12</time>
             </span>
 
           
@@ -208,12 +208,15 @@
       
         <p>子曰:”面向接口进行开发，而不是面向实现；依赖于抽象类型，而不是具体类。”<br><span id="more"></span><br>0.前置知识(UML图)<br>0.1 依赖(教授——&gt;课程，教授依赖于课程资料):如果修改一个类的定义可能会造成另一个类的变化，那么这两个类之间就存在依赖关系。(在一个类中调用另一个类)。<strong>对类 B 进行修改会影响到类 A 。</strong></p>
 <p>0.2 关联(教授====&gt;学生，教授与学生进行交流)：<br>关联可视为一种特殊类型的依赖，即一个对象总是拥有访问与其交互的对象的权限，而简单的依赖关系并不会在对象间建立永久性的联系。<strong>对象 A 知道对象 B。类 A 依赖于类 B。</strong></p>
-<p>0.3 聚合(院系&lt;&gt;====教授，院系包含教授，还有其他的东西)：<br>在聚合关系中，一个对象<strong>拥有</strong>一组其他对象，并扮演着容器或集合的角色。<strong>组件可以独立于容器存在</strong>，也可以同时连接多个容器。<strong>对象 A 知道对象 B 且由 B 构成。类 A 依赖于类 B。</strong></p>
-<p>0.4 组合(大学&lt;=&gt;====院系,大学由院系构成,院系不能脱离大学而存在)：<br>组合是一种特殊类型的聚合，其中一个对象由一个或多个其他对象实例构成。组合与其他关系的区别在于<strong>组件仅能作为容器的一部分存在。对象 A 知道对象 B、由 B 构成而且管理着 B 的生命周期。类 A 依赖于类 B。</strong><br><img src="https://s2.loli.net/2024/07/12/YaeoWSIDVXf2kGR.png" alt=" 关系图"></p>
+<p>0.3 聚合(院系&lt;&gt;====&gt;教授，院系包含教授，还有其他的东西)：<br>在聚合关系中，一个对象<strong>拥有</strong>一组其他对象，并扮演着容器或集合的角色。<strong>组件可以独立于容器存在</strong>，也可以同时连接多个容器。<strong>对象 A 知道对象 B 且由 B 构成。类 A 依赖于类 B。</strong></p>
+<p>0.4 组合(大学&lt;=&gt;====&gt;院系,大学由院系构成,院系不能脱离大学而存在)：<br>组合是一种特殊类型的聚合，其中一个对象由一个或多个其他对象实例构成。组合与其他关系的区别在于<strong>组件仅能作为容器的一部分存在。对象 A 知道对象 B、由 B 构成而且管理着 B 的生命周期。类 A 依赖于类 B。</strong><br><img src="https://s2.loli.net/2024/07/12/YaeoWSIDVXf2kGR.png" alt=" 关系图"></p>
 <p>0.5 设计模式分类<br><strong>创建型模式</strong>：提供创建对象的机制，增加已有代码的灵活性和可复用性。<br><strong>结构型模式</strong>：介绍如何将对象和类组装成较大的结构，并同时保持结构的灵活和高效。<br><strong>行为模式</strong>：负责对象间的高效沟通和职责委派。</p>
-<p>下面有一个例子，解释了为什么子曰：”通过接口与对象交互要比依赖于其具体类的好处更多。”<br><img src="https://s2.loli.net/2024/07/12/ZIeUSuV4PAGEbfg.png" alt=" 1"><br><img src="https://s2.loli.net/2024/07/12/NUgamj4BRdkl3Ou.png" alt=" 2"><br><img src="https://s2.loli.net/2024/07/12/xo4j71ZJBL5DkyE.png" alt=" 3"><br>这个过程是一个不断解耦合的过程，刚开始所有类紧密耦合，代码复用性极差。之后采用了多态的方法，但是<strong>公司</strong>的某些方法(createsoftware())仍然依赖于具体的<strong>员工</strong>。于是，我们又提供了一个<strong>getemployee()</strong>的接口,雇员对象将在具体公司子类中创建。这下公司基类彻底与员工解耦合了。</p>
+<p>下面有一个例子，解释了为什么子曰：”通过接口与对象交互要比依赖于其具体类的好处更多。”<br><img src="https://s2.loli.net/2024/07/12/ZIeUSuV4PAGEbfg.png" alt=" 1"></p>
+<p><img src="https://s2.loli.net/2024/07/12/NUgamj4BRdkl3Ou.png" alt=" 2"></p>
+<p><img src="https://s2.loli.net/2024/07/12/xo4j71ZJBL5DkyE.png" alt=" 3"><br>这个过程是一个不断解耦合的过程，刚开始所有类紧密耦合，代码复用性极差。之后采用了多态的方法，但是<strong>公司</strong>的某些方法(createsoftware())仍然依赖于具体的<strong>员工</strong>。于是，我们又提供了一个<strong>getemployee()</strong>的接口,雇员对象将在具体公司子类中创建。这下公司基类彻底与员工解耦合了。</p>
 <p>1.组合优于继承<br>组合是代替继承的一种方法。继承-&gt;(汽车<strong>是</strong>交通工具)，组合-&gt;(汽车<strong>有</strong>一个引擎).<br>下面看一个实例<br><img src="https://s2.loli.net/2024/07/12/k2PKiDVrZ8oOI9l.png" alt=" 4"><br>在多个维度上扩展一个类（汽车类型X引擎类型X驾驶类型)可能导致子类组合爆炸。</p>
 <p>这时，我们需要用到组合：将不同“维度”的功能抽取到各自的类层次结构中。<br><img src="https://s2.loli.net/2024/07/12/YV5DgH7jEAIl8GM.png" alt=" 5"></p>
+<p>2.SOLID原则<br>2.1 Single Responsibility Principle(单一职责原则)：尽量让每个类只负责软件中的一个功能，并将该功能完全封装（你也可称之为隐藏）在该类中。<br>2.2 Open/closed Principle(开闭原则)：本原则的主要理念是在实现新功能时能保持已有代码不变。对于扩展，类应该是“开放”的；对于修改，类则应是“封闭”的。<br>2.3 Liskov Substitution Principle(里氏替换原则)：当你扩展一个类时， 记住你应该要能在不修改客户端代码的情况下将子类的对象作为父类对象进行传递。这意味着子类必须保持与父类行为的兼容。在重写一个方法时，你要对基类行为进行扩展，而不是将其完全替换。<br><strong>子类方法的参数类型必须与其超类的参数类型相匹配或更加抽象。</strong><br><strong>子类方法的返回值类型必须与超类方法的返回值类型或是其子类别相匹配。</strong></p>
 
     </div>
 

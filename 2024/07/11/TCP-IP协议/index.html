@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://s2.loli.net/2024/07/11/GiBDMLQyv4x3PWn.png">
 <meta property="og:image" content="https://s2.loli.net/2024/07/11/YbxGMuTAiIFSW14.png">
 <meta property="article:published_time" content="2024-07-11T08:13:44.000Z">
-<meta property="article:modified_time" content="2024-07-11T11:52:57.026Z">
+<meta property="article:modified_time" content="2024-07-14T13:35:07.501Z">
 <meta property="article:author" content="HJX">
 <meta property="article:tag" content="计算机网络">
 <meta name="twitter:card" content="summary">
@@ -189,10 +189,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-07-11 16:13:44 / 修改时间：19:52:57" itemprop="dateCreated datePublished" datetime="2024-07-11T16:13:44+08:00">2024-07-11</time>
+              <time title="创建时间：2024-07-11 16:13:44" itemprop="dateCreated datePublished" datetime="2024-07-11T16:13:44+08:00">2024-07-11</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-07-14 21:35:07" itemprop="dateModified" datetime="2024-07-14T21:35:07+08:00">2024-07-14</time>
+              </span>
 
           
 
@@ -222,6 +228,21 @@
 <li>F 最终收到了数据包！并且发现目的MAC地址就是自己,于是收下了这个包。</li>
 </ol>
 <p><strong>HTTP报文传输过程</strong><br><img src="https://s2.loli.net/2024/07/11/YbxGMuTAiIFSW14.png" alt=" http"><br>应用层-&gt;传输层-&gt;网络层-&gt;链路层-&gt;链路层-&gt;网络层-&gt;传输层-&gt;应用层</p>
+<ol>
+<li>HTTP请求的生成<br>客户端（如浏览器）生成一个HTTP请求报文，包含请求行、请求头和请求体。</li>
+<li>传输层封装<br>HTTP请求报文在传输层通过TCP协议进行封装。<br>TCP连接建立：客户端与服务器之间通过三次握手建立TCP连接。<br>TCP报文段封装：HTTP请求报文被封装到TCP报文段中，加上TCP头信息（源端口、目的端口、序列号、确认号等）。</li>
+<li>网络层封装<br>在网络层，TCP报文段被封装到IP数据包中。<br>IP数据包封装：TCP报文段加上IP头信息（源IP地址、目的IP地址等），形成IP数据包。</li>
+<li>数据链路层封装<br>在数据链路层，IP数据包被封装到帧中，准备通过物理网络传输。<br>帧封装：IP数据包加上数据链路层头（如以太网头）和尾，形成数据帧。</li>
+<li>物理层传输<br>数据帧在物理层被转换为比特流，通过物理介质（如以太网、光纤等）进行传输。</li>
+<li>服务器接收数据<br>服务器接收到比特流后，依次通过各层协议进行解封装，直到获取到HTTP请求报文。<br>物理层：比特流转换为数据帧。<br>数据链路层：解析数据帧，提取IP数据包。<br>网络层：解析IP数据包，提取TCP报文段。<br>传输层：解析TCP报文段，提取HTTP请求报文。</li>
+<li>服务器处理请求<br>服务器根据HTTP请求报文中的信息，处理请求（如查找请求的网页资源）并生成HTTP响应报文。</li>
+<li>服务器响应报文的封装和发送<br>服务器将HTTP响应报文依次封装在TCP报文段、IP数据包和数据帧中，通过物理层传输给客户端。</li>
+<li>客户端接收响应<br>客户端接收到比特流后，依次通过各层协议进行解封装，直到获取到HTTP响应报文。<br>物理层：比特流转换为数据帧。<br>数据链路层：解析数据帧，提取IP数据包。<br>网络层：解析IP数据包，提取TCP报文段。<br>传输层：解析TCP报文段，提取HTTP响应报文。</li>
+<li>客户端处理响应<br>客户端处理HTTP响应报文，展示网页内容或执行相应的操作。</li>
+<li>连接关闭<br>在HTTP/1.1中，默认情况下TCP连接保持开启，可以复用。如果不再需要，客户端和服务器可以通过四次挥手关闭TCP连接。</li>
+</ol>
+<p><strong>数据的封装和分用</strong><br>假设你在浏览器中访问一个网站，浏览器将生成HTTP请求，这是应用层数据。下面是数据封装的过程:<br>1应用层: 生成HTTP请求数据。<br>2传输层: TCP协议为HTTP请求数据加上TCP头，形成TCP段。<br>3网络层: IP协议为TCP段加上IP头，形成IP包。<br>4数据链路层：以太网协议为IP包加上以太网头和尾，形成以太网帧。<br>5物理层: 将以太网帧转换为比特流，通过网络传输。</p>
+<p>当数据到达目标服务器时，进行分用过程:<br>1物理层: 接收比特流，重组为以太网帧。<br>2数据链路层: 解析以太网帧，提取出IP包。<br>3网络层: 解析IP包，提取出TCP段。<br>4传输层: 解析TCP段，提取出HTTP请求数据。<br>5应用层: 处理HTTP请求并生成响应。</p>
 
     </div>
 
@@ -244,8 +265,8 @@
       <i class="fa fa-chevron-left"></i> 蚁群算法
     </a></div>
       <div class="post-nav-item">
-    <a href="/2024/07/12/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%84%E5%90%88%E4%BC%98%E4%BA%8E%E7%BB%A7%E6%89%BF/" rel="next" title="设计模式/组合优于继承">
-      设计模式/组合优于继承 <i class="fa fa-chevron-right"></i>
+    <a href="/2024/07/12/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%84%E5%90%88%E4%BC%98%E4%BA%8E%E7%BB%A7%E6%89%BF/" rel="next" title="设计模式-1">
+      设计模式-1 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
