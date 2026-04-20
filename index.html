@@ -132,7 +132,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -159,6 +159,108 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://touyoutaaa.github.io/2026/04/20/RAG%E6%A6%82%E8%A7%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="touyoutaaa">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="云辇103">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | 云辇103">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2026/04/20/RAG%E6%A6%82%E8%A7%88/" class="post-title-link" itemprop="url">RAG概览</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-04-20 23:04:57 / 修改时间：23:06:59" itemprop="dateCreated datePublished" datetime="2026-04-20T23:04:57+08:00">2026-04-20</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="/blog%5Csource_posts%5Cimages%5Cimage.png" alt="alt text"></p>
+<h3 id="📖-阶段一：索引-Indexing-——-“把书买回来，做好标签放进图书馆”"><a href="#📖-阶段一：索引-Indexing-——-“把书买回来，做好标签放进图书馆”" class="headerlink" title="📖 阶段一：索引 (Indexing) —— “把书买回来，做好标签放进图书馆”"></a>📖 阶段一：索引 (Indexing) —— “把书买回来，做好标签放进图书馆”</h3><p><em>这个阶段是<strong>离线准备</strong>的，就像考试前你需要先整理好复习资料。</em></p>
+<ol>
+<li><strong>文档加载</strong>：你要查资料，首先得有书。这一步就是把你公司里的 PDF、Word、TXT、网页等各种格式的文档全部导进系统里。（<strong>进货买书</strong>）</li>
+<li><strong>文档分块</strong>：一整本书太厚了，大模型一口气读不完（受限于上下文窗口）。所以要把长文档切成一小段一小段的（Chunk）。比如按段落切，每段 500 字。（<strong>把书撕成一页页的“知识卡片”</strong>）</li>
+<li><strong>向量嵌入</strong>：计算机看不懂汉字，只懂数字。所以要用一个特殊的模型（Embedding 模型），把每一张“知识卡片”变成一串数学坐标（向量）。意思相近的句子，坐标就离得近。（<strong>给每张卡片打上“数学条形码”，按语义分类</strong>）<ul>
+<li><em>图中的箭头向下：这些打了条形码的卡片，最终都被存进了下一层楼的<strong>向量数据库</strong>中，随时备查。</em></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="🔍-阶段二：检索-Retrieval-——-“遇到考试题，去图书馆找相关的书页”"><a href="#🔍-阶段二：检索-Retrieval-——-“遇到考试题，去图书馆找相关的书页”" class="headerlink" title="🔍 阶段二：检索 (Retrieval) —— “遇到考试题，去图书馆找相关的书页”"></a>🔍 阶段二：检索 (Retrieval) —— “遇到考试题，去图书馆找相关的书页”</h3><p><em>这个阶段是<strong>实时发生</strong>的，用户开始提问了。</em></p>
+<ol>
+<li><strong>问题输入</strong>：用户问了一个问题，比如：“公司的报销流程是什么？”（<strong>看到考试卷上的题目</strong>）</li>
+<li><strong>向量嵌入</strong>：为了能在图书馆里找到答案，必须把用户的“问题”也变成同样的数学坐标（向量）。（<strong>把考试题目也翻译成“数学条形码”</strong>）</li>
+<li><strong>相似匹配</strong>  <strong>向量数据库</strong>：拿着问题的条形码，去<strong>向量数据库</strong>里扫一圈，计算数学距离（比如余弦相似度）。距离越近，说明卡片上的内容跟问题越相关。（<strong>图书管理员拿着你的题目，去书架上比对，找出最相关的卡片</strong>）</li>
+</ol>
+<hr>
+<h3 id="✍️-阶段三：生成-Generation-——-“照着找出来的资料，组织语言写出答案”"><a href="#✍️-阶段三：生成-Generation-——-“照着找出来的资料，组织语言写出答案”" class="headerlink" title="✍️ 阶段三：生成 (Generation) —— “照着找出来的资料，组织语言写出答案”"></a>✍️ 阶段三：生成 (Generation) —— “照着找出来的资料，组织语言写出答案”</h3><p><em>资料找到了，现在要让大模型开始写作业了。</em></p>
+<ol>
+<li><strong>top_k</strong>：数据库里可能匹配出成百上千相关的段落，但我们只要最相关的前几个（K一般设为3或5）。（<strong>挑出最最相关的 3 张知识卡片放在桌上</strong>）</li>
+<li><strong>提示词 Prompt</strong>：这是最关键的“拼接”环节。系统会在后台把“用户的原始问题”和“找出来的 top_k 知识卡片”缝合在一起，形成一段固定格式的话。<ul>
+<li><em>(画外音提示词类似于：“LLM你好，请根据以下参考资料【卡片1、卡片2、卡片3】，回答用户的问题【报销流程是什么？】”)</em></li>
+</ul>
+</li>
+<li><strong>LLM</strong>：大语言模型（像 ChatGPT）接收到了上面拼好的 Prompt。这时候，它不仅知道问题是什么，而且手边就有了正确答案的参考资料。（<strong>学生看着考卷题目，同时照着桌上的复习卡片开始作答</strong>）</li>
+<li><strong>答案输出</strong>：LLM 消化了参考资料的内容，用自然人类语言润色后输出给用户。完美避免了幻觉！（<strong>交出满分答卷</strong>）</li>
+</ol>
+<hr>
+<h3 id="🧠-一句话记忆口诀："><a href="#🧠-一句话记忆口诀：" class="headerlink" title="🧠 一句话记忆口诀："></a>🧠 一句话记忆口诀：</h3><p>为了加深记忆，你可以用这句顺口溜记住整张图：</p>
+<blockquote>
+<p><strong>“切碎资料变向量（索引），问题比对找前K（检索），拼进Prompt喂模型（生成）。”</strong></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
