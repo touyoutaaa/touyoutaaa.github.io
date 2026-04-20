@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"touyoutaaa.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、类型状态模式（Typestate Pattern）12345678910111213141516171819202122232425use std::marker::PhantomData;struct Disconnected;struct Connected;struct Socket&lt;State&gt; &#123;    fd: i32,    _state: PhantomDa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="哲学——为什么类型分析胜过测试">
+<meta property="og:url" content="https://touyoutaaa.github.io/2026/04/20/%E5%93%B2%E5%AD%A6%E2%80%94%E2%80%94%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E5%88%86%E6%9E%90%E8%83%9C%E8%BF%87%E6%B5%8B%E8%AF%95/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、类型状态模式（Typestate Pattern）12345678910111213141516171819202122232425use std::marker::PhantomData;struct Disconnected;struct Connected;struct Socket&lt;State&gt; &#123;    fd: i32,    _state: PhantomDa">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-04-20T09:53:33.000Z">
+<meta property="article:modified_time" content="2026-04-20T09:55:04.026Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Rust">
+<meta property="article:tag" content="RustTraining">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://touyoutaaa.github.io/2026/04/20/%E5%93%B2%E5%AD%A6%E2%80%94%E2%80%94%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E5%88%86%E6%9E%90%E8%83%9C%E8%BF%87%E6%B5%8B%E8%AF%95/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://touyoutaaa.github.io/2026/04/20/%E5%93%B2%E5%AD%A6%E2%80%94%E2%80%94%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E5%88%86%E6%9E%90%E8%83%9C%E8%BF%87%E6%B5%8B%E8%AF%95/","path":"2026/04/20/哲学——为什么类型分析胜过测试/","title":"哲学——为什么类型分析胜过测试"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>哲学——为什么类型分析胜过测试 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%B1%BB%E5%9E%8B%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F%EF%BC%88Typestate-Pattern%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">一、类型状态模式（Typestate Pattern）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E7%9B%B4%E7%99%BD%E8%A7%A3%E9%87%8A"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 直白解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-%E5%AE%9A%E4%B9%89%E4%B8%8D%E5%90%8C%E7%9A%84%E7%8A%B6%E6%80%81%EF%BC%88%E6%A0%87%E7%AD%BE%EF%BC%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">1.2.1 定义不同的状态（标签）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-%E8%AE%A9-Socket-%E6%90%BA%E5%B8%A6%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">1.2.2 让 Socket 携带状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-3-%E4%B8%BA%E4%B8%8D%E5%90%8C%E7%8A%B6%E6%80%81%E5%AE%9E%E7%8E%B0%E4%B8%8D%E5%90%8C%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.3.</span> <span class="nav-text">1.2.3 为不同状态实现不同的方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 代码示例对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-%E4%BC%98%E5%8A%BF%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 优势总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%80%9A%E8%BF%87%E5%85%B3%E8%81%94%E7%B1%BB%E5%9E%8B%E7%A1%AE%E4%BF%9D%E5%8D%8F%E8%AE%AE%E6%AD%A3%E7%A1%AE%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">二、通过关联类型确保协议正确性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87%EF%BC%9A%E7%BB%91%E5%AE%9A%E2%80%9D%E8%AF%B7%E6%B1%82%E2%80%9D%E4%B8%8E%E2%80%9D%E5%93%8D%E5%BA%94%E2%80%9D"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 核心目标：绑定”请求”与”响应”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E4%BB%A3%E7%A0%81%E9%80%90%E6%AE%B5%E8%A7%A3%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 代码逐段解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-%E5%AE%9A%E4%B9%89-Trait%EF%BC%88%E5%8D%8F%E8%AE%AE%E9%AA%A8%E6%9E%B6%EF%BC%89"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.2.1 定义 Trait（协议骨架）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-%E5%85%B7%E4%BD%93%E5%91%BD%E4%BB%A4%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2.2 具体命令实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-%E6%B3%9B%E5%9E%8B%E6%89%A7%E8%A1%8C%E5%87%BD%E6%95%B0"><span class="nav-number">2.2.3.</span> <span class="nav-text">2.2.3 泛型执行函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E8%BF%99%E5%AE%9E%E7%8E%B0%E4%BA%86%E2%80%9D%E5%8D%8F%E8%AE%AE%E6%AD%A3%E7%A1%AE%E6%80%A7%E2%80%9D%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 为什么说这实现了”协议正确性”？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E7%A1%AC%E4%BB%B6%E5%B1%82%E9%9D%A2%E7%9A%84%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 硬件层面的实际应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-%E6%80%BB%E7%BB%93"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://touyoutaaa.github.io/2026/04/20/%E5%93%B2%E5%AD%A6%E2%80%94%E2%80%94%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E5%88%86%E6%9E%90%E8%83%9C%E8%BF%87%E6%B5%8B%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="哲学——为什么类型分析胜过测试 | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          哲学——为什么类型分析胜过测试
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2026-04-20 17:53:33 / Modified: 17:55:04" itemprop="dateCreated datePublished" datetime="2026-04-20T17:53:33+08:00">2026-04-20</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="一、类型状态模式（Typestate-Pattern）"><a href="#一、类型状态模式（Typestate-Pattern）" class="headerlink" title="一、类型状态模式（Typestate Pattern）"></a>一、类型状态模式（Typestate Pattern）</h1><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::marker::PhantomData;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Disconnected</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Connected</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Socket</span>&lt;State&gt; &#123;</span><br><span class="line">    fd: <span class="type">i32</span>,</span><br><span class="line">    _state: PhantomData&lt;State&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Socket</span>&lt;Disconnected&gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">connect</span>(<span class="keyword">self</span>, addr: &amp;<span class="type">str</span>) <span class="punctuation">-&gt;</span> Socket&lt;Connected&gt; &#123;</span><br><span class="line">        <span class="comment">// ... connect logic ...</span></span><br><span class="line">        Socket &#123; fd: <span class="keyword">self</span>.fd, _state: PhantomData &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Socket</span>&lt;Connected&gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">send</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, data: &amp;[<span class="type">u8</span>]) &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">disconnect</span>(<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> Socket&lt;Disconnected&gt; &#123;</span><br><span class="line">        Socket &#123; fd: <span class="keyword">self</span>.fd, _state: PhantomData &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Socket&lt;Disconnected&gt; has no send() method — compile error if you try</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码展示了 Rust 中一种非常高级且强大的设计模式，叫做 <strong>Typestate Pattern（类型状态模式）</strong>。</p>
+<p>它的核心意思是：<strong>利用 Rust 的编译检查，确保你永远不会在错误的状态下调用错误的函数。</strong></p>
+<h2 id="1-1-直白解释"><a href="#1-1-直白解释" class="headerlink" title="1.1 直白解释"></a>1.1 直白解释</h2><p>在普通的编程语言中（比如 C++ 或 Java），你可能会写这样的代码：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Socket</span> &#123;</span><br><span class="line">    is_connected: <span class="type">bool</span>,</span><br><span class="line">    fd: <span class="type">i32</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Socket</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">send</span>(&amp;<span class="keyword">self</span>, data: &amp;[<span class="type">u8</span>]) &#123;</span><br><span class="line">        <span class="keyword">if</span> !<span class="keyword">self</span>.is_connected &#123;</span><br><span class="line">            <span class="built_in">panic!</span>(<span class="string">&quot;还没连接呢！不能发数据！&quot;</span>); <span class="comment">// 这种错误只有在程序运行时才会发现</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但在 Rust 代码里，<strong>如果你试图在断开连接时调用 <code>send()</code>，程序根本编译不通过。</strong> 编译器会直接告诉你：”对不起，<code>Socket&lt;Disconnected&gt;</code> 这个类型没有 <code>send</code> 方法”。</p>
+<h2 id="1-2-实现原理"><a href="#1-2-实现原理" class="headerlink" title="1.2 实现原理"></a>1.2 实现原理</h2><h3 id="1-2-1-定义不同的状态（标签）"><a href="#1-2-1-定义不同的状态（标签）" class="headerlink" title="1.2.1 定义不同的状态（标签）"></a>1.2.1 定义不同的状态（标签）</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Disconnected</span>; <span class="comment">// 状态 A：断开</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Connected</span>;    <span class="comment">// 状态 B：连接</span></span><br></pre></td></tr></table></figure>
+
+<p>这两个结构体没有任何字段，它们只是”标签”。</p>
+<h3 id="1-2-2-让-Socket-携带状态"><a href="#1-2-2-让-Socket-携带状态" class="headerlink" title="1.2.2 让 Socket 携带状态"></a>1.2.2 让 Socket 携带状态</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Socket</span>&lt;State&gt; &#123;</span><br><span class="line">    fd: <span class="type">i32</span>,</span><br><span class="line">    _state: PhantomData&lt;State&gt;, <span class="comment">// 告诉编译器：这个 Socket 现在处于 State 状态</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>PhantomData</code> 就像一个占位符，它不占内存，只在编译阶段起作用，标记当前的 <code>State</code> 是什么。</p>
+<h3 id="1-2-3-为不同状态实现不同的方法"><a href="#1-2-3-为不同状态实现不同的方法" class="headerlink" title="1.2.3 为不同状态实现不同的方法"></a>1.2.3 为不同状态实现不同的方法</h3><p>这是最关键的地方：<strong>方法是分家写的。</strong></p>
+<ul>
+<li><p><strong>只有 <code>Socket&lt;Disconnected&gt;</code> 才有 <code>connect</code> 方法：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> <span class="title class_">Socket</span>&lt;Disconnected&gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">connect</span>(<span class="keyword">self</span>, ...) <span class="punctuation">-&gt;</span> Socket&lt;Connected&gt; &#123; ... &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意：<code>connect</code> 会消耗掉原来的自己（<code>self</code>），返回一个全新的类型 <code>Socket&lt;Connected&gt;</code>。</p>
+</li>
+<li><p><strong>只有 <code>Socket&lt;Connected&gt;</code> 才有 <code>send</code> 和 <code>disconnect</code> 方法：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> <span class="title class_">Socket</span>&lt;Connected&gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">send</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, data: &amp;[<span class="type">u8</span>]) &#123; ... &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">disconnect</span>(<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> Socket&lt;Disconnected&gt; &#123; ... &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="1-3-代码示例对比"><a href="#1-3-代码示例对比" class="headerlink" title="1.3 代码示例对比"></a>1.3 代码示例对比</h2><p>如果你这么写：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">socket</span> = Socket &#123; fd: <span class="number">1</span>, _state: PhantomData &#125;; <span class="comment">// 默认是 Disconnected</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 编译报错！</span></span><br><span class="line"><span class="comment">// 编译器会说：Socket&lt;Disconnected&gt; 没定义 send 方法</span></span><br><span class="line"><span class="comment">// 你在写代码阶段就能发现错误，而不是等程序跑起来崩溃</span></span><br><span class="line">socket.<span class="title function_ invoke__">send</span>(<span class="string">b&quot;hello&quot;</span>); </span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 必须先 connect</span></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">connected_socket</span> = socket.<span class="title function_ invoke__">connect</span>(<span class="string">&quot;127.0.0.1&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 现在可以 send 了，因为类型变成了 Socket&lt;Connected&gt;</span></span><br><span class="line">connected_socket.<span class="title function_ invoke__">send</span>(<span class="string">b&quot;hello&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ❌ 再次报错！</span></span><br><span class="line"><span class="comment">// 一旦调用 disconnect，变量会被消耗，不能再调用 send</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">closed_socket</span> = connected_socket.<span class="title function_ invoke__">disconnect</span>();</span><br><span class="line">connected_socket.<span class="title function_ invoke__">send</span>(<span class="string">b&quot;bye&quot;</span>); <span class="comment">// 编译报错：Value used after move</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="1-4-优势总结"><a href="#1-4-优势总结" class="headerlink" title="1.4 优势总结"></a>1.4 优势总结</h2><ol>
+<li><strong>状态安全</strong>：你不可能忘记检查连接状态，因为编译器替你检查了。</li>
+<li><strong>零成本抽象</strong>：这些 <code>PhantomData</code> 和泛型状态只存在于编译期，编译出来的机器码里没有任何多余的 <code>if-else</code> 判断，性能极高。</li>
+<li><strong>API 指引</strong>：开发者在使用你的库时，编辑器只弹出会展示当前状态下可用的方法。如果你没连接，编辑器压根不会提示你 <code>send</code> 方法。</li>
+</ol>
+<p><strong>一句话总结：它把”逻辑错误”变成了”语法错误”。</strong></p>
+<hr>
+<h1 id="二、通过关联类型确保协议正确性"><a href="#二、通过关联类型确保协议正确性" class="headerlink" title="二、通过关联类型确保协议正确性"></a>二、通过关联类型确保协议正确性</h1><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::io;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> <span class="title class_">IpmiCmd</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span>;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;<span class="keyword">Self</span>::Response&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Simplified for illustration — see ch02 for the full trait with</span></span><br><span class="line"><span class="comment">// net_fn(), cmd_byte(), payload(), and parse_response().</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ReadTemp</span> &#123; sensor_id: <span class="type">u8</span> &#125;</span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">IpmiCmd</span> <span class="keyword">for</span> <span class="title class_">ReadTemp</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span> = Celsius;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;Celsius&gt; &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(<span class="title function_ invoke__">Celsius</span>(raw[<span class="number">0</span>] <span class="keyword">as</span> <span class="type">i8</span> <span class="keyword">as</span> <span class="type">f64</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">execute</span>&lt;C: IpmiCmd&gt;(cmd: &amp;C, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;C::Response&gt; &#123;</span><br><span class="line">    cmd.<span class="title function_ invoke__">parse_response</span>(raw)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ReadTemp always returns Celsius — can&#x27;t accidentally get Rpm</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码展示了 Rust 中一个非常核心的设计哲学：<strong>通过类型系统确保协议正确性（Protocol Correctness）</strong>，即所谓的”<strong>使非法状态不可表达</strong>“（Make invalid interactions unrepresentable）。</p>
+<h2 id="2-1-核心目标：绑定”请求”与”响应”"><a href="#2-1-核心目标：绑定”请求”与”响应”" class="headerlink" title="2.1 核心目标：绑定”请求”与”响应”"></a>2.1 核心目标：绑定”请求”与”响应”</h2><p>在底层协议（如 IPMI、NVMe）中，你发送一个特定的命令（Request），硬件会返回一段二进制数据。传统做法通常是手动解析这些字节，但这容易出错：你可能会不小心用解析”转速”的代码去解析”温度”数据。</p>
+<p>这段代码通过 Rust 的 <strong>关联类型（Associated Types）</strong> 在编译阶段解决了这个问题。</p>
+<h2 id="2-2-代码逐段解析"><a href="#2-2-代码逐段解析" class="headerlink" title="2.2 代码逐段解析"></a>2.2 代码逐段解析</h2><h3 id="2-2-1-定义-Trait（协议骨架）"><a href="#2-2-1-定义-Trait（协议骨架）" class="headerlink" title="2.2.1 定义 Trait（协议骨架）"></a>2.2.1 定义 Trait（协议骨架）</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title class_">IpmiCmd</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span>; <span class="comment">// 关联类型：每个命令必须定义它对应的返回类型</span></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;<span class="keyword">Self</span>::Response&gt;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>type Response;</code> 是关键。它告诉编译器：<strong>任何实现了 <code>IpmiCmd</code> 的类型，都必须明确指定它返回什么类型的数据。</strong></li>
+</ul>
+<h3 id="2-2-2-具体命令实现"><a href="#2-2-2-具体命令实现" class="headerlink" title="2.2.2 具体命令实现"></a>2.2.2 具体命令实现</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ReadTemp</span> &#123; sensor_id: <span class="type">u8</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">IpmiCmd</span> <span class="keyword">for</span> <span class="title class_">ReadTemp</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span> = Celsius; <span class="comment">// 绑定：ReadTemp 命令只能返回 Celsius 类型</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;Celsius&gt; &#123;</span><br><span class="line">        <span class="comment">// 将原始字节解析为 Celsius 结构体</span></span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(<span class="title function_ invoke__">Celsius</span>(raw[<span class="number">0</span>] <span class="keyword">as</span> <span class="type">i8</span> <span class="keyword">as</span> <span class="type">f64</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这里将 <code>ReadTemp</code> 结构体与 <code>Celsius</code>（摄氏度）类型硬绑定。</li>
+<li>如果你尝试在 <code>parse_response</code> 里返回一个 <code>Rpm</code>（转速）类型，编译器会直接报错。</li>
+</ul>
+<h3 id="2-2-3-泛型执行函数"><a href="#2-2-3-泛型执行函数" class="headerlink" title="2.2.3 泛型执行函数"></a>2.2.3 泛型执行函数</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">execute</span>&lt;C: IpmiCmd&gt;(cmd: &amp;C, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;C::Response&gt; &#123;</span><br><span class="line">    cmd.<span class="title function_ invoke__">parse_response</span>(raw)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这是一个通用的执行函数。它的返回类型是 <code>C::Response</code>。</li>
+<li>这意味着：如果你传入的是 <code>ReadTemp</code>，函数返回值的类型在<strong>编译时</strong>就被确定为 <code>Celsius</code>。</li>
+</ul>
+<h2 id="2-3-为什么说这实现了”协议正确性”？"><a href="#2-3-为什么说这实现了”协议正确性”？" class="headerlink" title="2.3 为什么说这实现了”协议正确性”？"></a>2.3 为什么说这实现了”协议正确性”？</h2><blockquote>
+<p><strong>“ReadTemp always returns Celsius — can’t accidentally get Rpm”</strong><br>（ReadTemp 总是返回 Celsius —— 不会意外地得到 Rpm）</p>
+</blockquote>
+<ul>
+<li><strong>传统方式的风险：</strong> 在 C 语言或动态语言中，你可能写出 <code>data = execute(READ_TEMP_CMD); rpm = parse_as_rpm(data);</code> 这样的代码。这在逻辑上是错的，但编译器不会阻止你。</li>
+<li><strong>Rust 的安全性：</strong> 在这段代码的设计下，如果你写 <code>let res: Rpm = execute(&amp;read_temp_cmd, raw);</code>，<strong>代码根本无法通过编译</strong>。因为 <code>ReadTemp</code> 的 <code>Response</code> 类型是 <code>Celsius</code>，它与 <code>Rpm</code> 类型不匹配。</li>
+</ul>
+<h2 id="2-4-硬件层面的实际应用"><a href="#2-4-硬件层面的实际应用" class="headerlink" title="2.4 硬件层面的实际应用"></a>2.4 硬件层面的实际应用</h2><p>例子中提到的 <strong>IPMI, Redfish, NVMe Admin commands</strong> 都是复杂的硬件管理协议。</p>
+<ul>
+<li>这些协议有成百上千个命令。</li>
+<li>每个命令对应的二进制响应格式都不同。</li>
+<li>使用这种模式，可以为每个命令编写一个结构体，并绑定其特有的响应结构体。这样开发者在调用 API 时，类型系统会自动引导他们写出正确的解析逻辑，极大地减少了底层驱动开发中的 Bug。</li>
+</ul>
+<h2 id="2-5-总结"><a href="#2-5-总结" class="headerlink" title="2.5 总结"></a>2.5 总结</h2><p>这段代码演示了如何利用 Rust 的 <strong>Trait</strong> 和 <strong>Associated Types</strong> 来建模复杂的交互协议。它将”运行时的协议逻辑错误”转换成了”编译时的类型错误”，从而保证了程序的绝对健壮性。</p>
+<p><strong>核心思想：把”逻辑错误”变成”语法错误”。</strong></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Rust/" rel="tag"># Rust</a>
+              <a href="/tags/RustTraining/" rel="tag"># RustTraining</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/04/20/Rust%E4%B8%9A%E5%8A%A1%E5%BC%80%E5%8F%91%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" rel="prev" title="Rust业务开发最佳实践">
+                  <i class="fa fa-angle-left"></i> Rust业务开发最佳实践
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">John Doe</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
