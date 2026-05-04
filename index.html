@@ -139,7 +139,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -167,6 +167,334 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://touyoutaaa.github.io/2026/05/05/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BA%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="touyoutaaa">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="云辇103">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | 云辇103">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2026/05/05/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BA%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" class="post-title-link" itemprop="url">从零构建大语言模型</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-05-05 00:44:55 / 修改时间：00:45:37" itemprop="dateCreated datePublished" datetime="2026-05-05T00:44:55+08:00">2026-05-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="从零构建大语言模型：用-500-行代码拆开-GPT-的内部结构"><a href="#从零构建大语言模型：用-500-行代码拆开-GPT-的内部结构" class="headerlink" title="从零构建大语言模型：用 500 行代码拆开 GPT 的内部结构"></a>从零构建大语言模型：用 500 行代码拆开 GPT 的内部结构</h1><p>大语言模型很容易被讲得玄而又玄。参数规模、注意力机制、训练损失、采样策略，这些词单独看都不难，堆在一起却常常让人失去抓手。真正让人建立理解的方式，不是背概念，而是沿着一份能运行的代码，一步一步看清模型到底做了什么。</p>
+<p>这篇文章想做的，就是把一个 GPT 风格的大语言模型还原成一条完整的工程流水线：从原始文本开始，经过分词、采样、嵌入、注意力计算、损失优化，最后变成一个能够逐 token 生成文本的系统。虽然示例实现只有几百行代码，但它已经包含了语言模型最核心的骨架。</p>
+<p>如果把整个过程压缩成一句话，那就是：</p>
+<p><strong>LLM 的本质，是一个不断学习“给定上文，下一词最可能是什么”的概率模型。</strong></p>
+<hr>
+<h2 id="一、先别急着看模型，LLM-的入口其实是数据"><a href="#一、先别急着看模型，LLM-的入口其实是数据" class="headerlink" title="一、先别急着看模型，LLM 的入口其实是数据"></a>一、先别急着看模型，LLM 的入口其实是数据</h2><p>很多人一上来就盯着 Transformer，但真正的第一步其实是数据准备。模型不会直接读取文本，它看到的永远不是句子，而是一串数字。</p>
+<h3 id="1-为什么训练前要先切分训练集和验证集"><a href="#1-为什么训练前要先切分训练集和验证集" class="headerlink" title="1. 为什么训练前要先切分训练集和验证集"></a>1. 为什么训练前要先切分训练集和验证集</h3><p>训练集和验证集的划分，本质上是在回答两个不同的问题：</p>
+<ul>
+<li>训练集：模型能不能把规律学进去</li>
+<li>验证集：模型学到的是规律，还是答案本身</li>
+</ul>
+<p>一个很常见的错误是只关注训练损失。训练损失下降并不一定代表模型“理解”了语言，也可能只是把训练样本记住了。验证集的意义，就是拿一批它没见过的数据做检查。如果训练损失持续降低，但验证损失开始变差，那通常就是过拟合信号。</p>
+<p>可以把它理解成：</p>
+<ul>
+<li>训练集像练习册</li>
+<li>验证集像模拟考试</li>
+</ul>
+<hr>
+<h3 id="2-文本为什么不能直接送进模型"><a href="#2-文本为什么不能直接送进模型" class="headerlink" title="2. 文本为什么不能直接送进模型"></a>2. 文本为什么不能直接送进模型</h3><p>神经网络本质上处理的是张量，不是字符串。<br>所以原始文本必须先经过三层转换：</p>
+<ol>
+<li>文本切成 token</li>
+<li>token 映射成 token id</li>
+<li>token id 再映射成向量</li>
+</ol>
+<p>这个过程的第一步就是分词。现代语言模型一般不会简单按“单词”切，而是采用子词级别的编码方式，比如 BPE。这样可以兼顾词表大小和泛化能力，即使遇到陌生词，也能拆成更小的已知片段。</p>
+<p>下面是一段简化后的示意代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">text = <span class="string">&quot;LLM is all you need.&quot;</span></span><br><span class="line"></span><br><span class="line">tokens = tokenizer.encode(text)</span><br><span class="line"><span class="built_in">print</span>(tokens)</span><br><span class="line"><span class="comment"># [1234, 318, 477, 345, 761, 13]</span></span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>1234</code>、<code>318</code> 之类的数字，就是模型真正看到的输入。<br>从这一刻开始，文本已经不再是“语言”，而变成了“离散符号序列”。</p>
+<p><strong>配图建议 1：文本到 token 的转换流程图</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    A[&quot;原始文本&quot;] --&gt; B[&quot;Tokenizer 分词&quot;]</span><br><span class="line">    B --&gt; C[&quot;Token 序列&quot;]</span><br><span class="line">    C --&gt; D[&quot;Token ID 序列&quot;]</span><br><span class="line">    D --&gt; E[&quot;Embedding 向量序列&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>图注建议：<br>“语言模型并不直接处理文本，而是先把文本转成 token id，再映射到向量空间。”</p>
+<hr>
+<h3 id="3-滑动窗口：连续文本如何变成监督学习样本"><a href="#3-滑动窗口：连续文本如何变成监督学习样本" class="headerlink" title="3. 滑动窗口：连续文本如何变成监督学习样本"></a>3. 滑动窗口：连续文本如何变成监督学习样本</h3><p>语言模型训练时，不是把整本书一次喂进去，而是切成很多个小样本。<br>切分方法通常是滑动窗口。</p>
+<p>假设 token 序列是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[t1, t2, t3, t4, t5, t6]</span><br></pre></td></tr></table></figure>
+
+<p>如果上下文长度是 4，那么可以构造出这样的训练对：</p>
+<ul>
+<li>输入：<code>[t1, t2, t3, t4]</code></li>
+<li>目标：<code>[t2, t3, t4, t5]</code></li>
+</ul>
+<p>也就是说，模型在每个位置上都在学习同一件事：<br><strong>看到当前位置之前的内容，预测下一个 token。</strong></p>
+<p>示意代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">build_samples</span>(<span class="params">token_ids, max_length, stride</span>):</span><br><span class="line">    inputs, targets = [], []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(token_ids) - max_length, stride):</span><br><span class="line">        x = token_ids[i:i + max_length]</span><br><span class="line">        y = token_ids[i + <span class="number">1</span>:i + max_length + <span class="number">1</span>]</span><br><span class="line">        inputs.append(x)</span><br><span class="line">        targets.append(y)</span><br><span class="line">    <span class="keyword">return</span> inputs, targets</span><br></pre></td></tr></table></figure>
+
+<p>这是语言模型训练中最关键的“样本构造逻辑”。<br>它把一段连续文本，自动转成了大量标准的监督学习样本。</p>
+<p><strong>配图建议 2：滑动窗口采样示意图</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[&quot;Token 序列: t1 t2 t3 t4 t5 t6&quot;] --&gt; B[&quot;输入: t1 t2 t3 t4&quot;]</span><br><span class="line">    A --&gt; C[&quot;目标: t2 t3 t4 t5&quot;]</span><br><span class="line">    A --&gt; D[&quot;窗口右移&quot;]</span><br><span class="line">    D --&gt; E[&quot;输入: t2 t3 t4 t5&quot;]</span><br><span class="line">    D --&gt; F[&quot;目标: t3 t4 t5 t6&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>图注建议：<br>“滑动窗口把连续文本切成输入-目标对，使语言建模变成标准监督学习任务。”</p>
+<hr>
+<h2 id="二、模型输入并不是-token，而是“带位置的向量”"><a href="#二、模型输入并不是-token，而是“带位置的向量”" class="headerlink" title="二、模型输入并不是 token，而是“带位置的向量”"></a>二、模型输入并不是 token，而是“带位置的向量”</h2><p>当数据变成 token id 之后，还不能直接进入 Transformer。因为整数 id 本身既没有语义，也没有顺序概念。</p>
+<h3 id="1-Token-Embedding：把离散符号投到连续空间"><a href="#1-Token-Embedding：把离散符号投到连续空间" class="headerlink" title="1. Token Embedding：把离散符号投到连续空间"></a>1. Token Embedding：把离散符号投到连续空间</h3><p>Embedding 可以看成一张可训练的查找表。<br>每个 token id 都会查到一个对应向量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">token_emb = nn.Embedding(vocab_size, emb_dim)</span><br><span class="line">x = token_emb(input_ids)</span><br><span class="line"><span class="comment"># shape: [batch_size, seq_len, emb_dim]</span></span><br></pre></td></tr></table></figure>
+
+<p>这个向量不是人工定义的，而是在训练中学出来的。<br>模型会逐渐把语义相近的 token 映射到相近的位置。</p>
+<hr>
+<h3 id="2-Position-Embedding：让模型知道“谁在前，谁在后”"><a href="#2-Position-Embedding：让模型知道“谁在前，谁在后”" class="headerlink" title="2. Position Embedding：让模型知道“谁在前，谁在后”"></a>2. Position Embedding：让模型知道“谁在前，谁在后”</h3><p>注意力机制有一个天然弱点：它本身不理解顺序。<br>如果不给位置信息，“人咬狗”和“狗咬人”在模型眼里只是同一批 token 的排列组合。</p>
+<p>因此我们还需要位置嵌入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pos_ids = torch.arange(seq_len)</span><br><span class="line">pos_emb = position_embedding(pos_ids)</span><br><span class="line"></span><br><span class="line">x = token_emb(input_ids) + pos_emb</span><br></pre></td></tr></table></figure>
+
+<p>这一步把“词义”和“位置”融合起来。<br>从这里开始，模型拿到的才是真正可用的输入表示。</p>
+<p><strong>配图建议 3：输入表示层结构图</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    A[&quot;Token IDs&quot;] --&gt; B[&quot;Token Embedding&quot;]</span><br><span class="line">    C[&quot;Position IDs&quot;] --&gt; D[&quot;Position Embedding&quot;]</span><br><span class="line">    B --&gt; E[&quot;逐元素相加&quot;]</span><br><span class="line">    D --&gt; E</span><br><span class="line">    E --&gt; F[&quot;输入向量序列&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>图注建议：<br>“模型输入不是 token id 本身，而是词义向量与位置向量之和。”</p>
+<hr>
+<h2 id="三、Transformer-Block：GPT-真正“理解上下文”的地方"><a href="#三、Transformer-Block：GPT-真正“理解上下文”的地方" class="headerlink" title="三、Transformer Block：GPT 真正“理解上下文”的地方"></a>三、Transformer Block：GPT 真正“理解上下文”的地方</h2><p>GPT 的主体，其实就是多个 Transformer Block 的堆叠。<br>每个 Block 内部大致包含：</p>
+<ul>
+<li>LayerNorm</li>
+<li>Causal Self-Attention</li>
+<li>Residual Connection</li>
+<li>LayerNorm</li>
+<li>FeedForward</li>
+<li>Residual Connection</li>
+</ul>
+<p>可以用下面这张图概括：</p>
+<p><strong>配图建议 4：Transformer Block 结构图</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[&quot;输入 x&quot;] --&gt; B[&quot;LayerNorm&quot;]</span><br><span class="line">    B --&gt; C[&quot;Causal Multi-Head Attention&quot;]</span><br><span class="line">    C --&gt; D[&quot;残差相加&quot;]</span><br><span class="line">    D --&gt; E[&quot;LayerNorm&quot;]</span><br><span class="line">    E --&gt; F[&quot;FeedForward&quot;]</span><br><span class="line">    F --&gt; G[&quot;残差相加&quot;]</span><br><span class="line">    G --&gt; H[&quot;输出&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>图注建议：<br>“一个 Transformer Block 的标准结构：注意力负责上下文融合，前馈网络负责非线性加工，残差连接负责稳定深层训练。”</p>
+<hr>
+<h2 id="四、自注意力：模型如何决定“该关注谁”"><a href="#四、自注意力：模型如何决定“该关注谁”" class="headerlink" title="四、自注意力：模型如何决定“该关注谁”"></a>四、自注意力：模型如何决定“该关注谁”</h2><p>自注意力机制可以粗略理解成一句话：</p>
+<p><strong>每个 token 都会主动查看上下文里其他 token，并按相关性把它们的信息加权汇总。</strong></p>
+<h3 id="1-最直观的三步"><a href="#1-最直观的三步" class="headerlink" title="1. 最直观的三步"></a>1. 最直观的三步</h3><p>对于某个 token，自注意力的处理流程是：</p>
+<ol>
+<li>算相关性分数</li>
+<li>softmax 变成权重</li>
+<li>按权重汇总上下文信息</li>
+</ol>
+<p>最简化的表达可以写成：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scores = x @ x.T</span><br><span class="line">weights = softmax(scores)</span><br><span class="line">context = weights @ x</span><br></pre></td></tr></table></figure>
+
+<p>当然，真实实现不会直接这么写，因为还要引入 Q、K、V。</p>
+<hr>
+<h3 id="2-为什么一定要拆成-Q、K、V"><a href="#2-为什么一定要拆成-Q、K、V" class="headerlink" title="2. 为什么一定要拆成 Q、K、V"></a>2. 为什么一定要拆成 Q、K、V</h3><p>如果直接用原始向量计算相似度，一个向量既要代表语义，又要负责匹配关系，职责会混在一起。<br>Transformer 的解决方案是把输入投影成三种不同角色：</p>
+<ul>
+<li><code>Q</code>：我想找什么</li>
+<li><code>K</code>：我能被怎样匹配</li>
+<li><code>V</code>：我真正携带的信息</li>
+</ul>
+<p>示意代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Q = Wq(x)</span><br><span class="line">K = Wk(x)</span><br><span class="line">V = Wv(x)</span><br><span class="line"></span><br><span class="line">scores = Q @ K.transpose(-<span class="number">2</span>, -<span class="number">1</span>) / sqrt(head_dim)</span><br><span class="line">weights = softmax(scores)</span><br><span class="line">context = weights @ V</span><br></pre></td></tr></table></figure>
+
+<p>这一步极大提升了灵活性。<br>模型不再只是“比向量像不像”，而是在学习“如何表示查询、如何表示键、如何提取值”。</p>
+<hr>
+<h3 id="3-因果掩码：GPT-为什么不能看未来"><a href="#3-因果掩码：GPT-为什么不能看未来" class="headerlink" title="3. 因果掩码：GPT 为什么不能看未来"></a>3. 因果掩码：GPT 为什么不能看未来</h3><p>GPT 是生成模型，所以在预测第 <code>t</code> 个 token 时，不能看到 <code>t+1</code> 之后的内容。<br>否则训练时就等于作弊。</p>
+<p>实现方法是对注意力分数加一个上三角 mask：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mask = torch.triu(torch.ones(seq_len, seq_len), diagonal=<span class="number">1</span>)</span><br><span class="line">scores = scores.masked_fill(mask == <span class="number">1</span>, <span class="built_in">float</span>(<span class="string">&quot;-inf&quot;</span>))</span><br><span class="line">weights = softmax(scores, dim=-<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这样未来位置的分数会被压成负无穷，经过 softmax 后概率接近 0。<br>最终，每个位置只能关注自己和之前的位置。</p>
+<p><strong>配图建议 5：因果掩码矩阵</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[&quot;注意力分数矩阵&quot;] --&gt; B[&quot;加上上三角 Mask&quot;]</span><br><span class="line">    B --&gt; C[&quot;未来位置被置为 -inf&quot;]</span><br><span class="line">    C --&gt; D[&quot;Softmax 后未来概率为 0&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>图注建议：<br>“因果掩码保证 GPT 在生成时只能看见过去，不能偷看未来 token。”</p>
+<hr>
+<h3 id="4-多头注意力：为什么不是只用一套注意力"><a href="#4-多头注意力：为什么不是只用一套注意力" class="headerlink" title="4. 多头注意力：为什么不是只用一套注意力"></a>4. 多头注意力：为什么不是只用一套注意力</h3><p>单头注意力只有一种上下文理解方式。<br>但语言中的关系远不止一种：</p>
+<ul>
+<li>语法依赖</li>
+<li>语义关联</li>
+<li>长距离引用</li>
+<li>局部搭配关系</li>
+</ul>
+<p>多头注意力的做法，就是并行学习多套 QKV 投影，让模型同时从多个子空间观察同一句话。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">heads = []</span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(num_heads):</span><br><span class="line">    q = Wq_i(x)</span><br><span class="line">    k = Wk_i(x)</span><br><span class="line">    v = Wv_i(x)</span><br><span class="line">    head = attention(q, k, v)</span><br><span class="line">    heads.append(head)</span><br><span class="line"></span><br><span class="line">output = Wo(concat(heads))</span><br></pre></td></tr></table></figure>
+
+<p>现代实现通常会把多头并成一次大矩阵计算，以充分利用 GPU 并行能力，但原理是一致的。</p>
+<hr>
+<h2 id="五、为什么注意力之外还必须有-FFN、LayerNorm-和残差连接"><a href="#五、为什么注意力之外还必须有-FFN、LayerNorm-和残差连接" class="headerlink" title="五、为什么注意力之外还必须有 FFN、LayerNorm 和残差连接"></a>五、为什么注意力之外还必须有 FFN、LayerNorm 和残差连接</h2><p>如果只有注意力，模型还不够完整。<br>注意力负责“整合信息”，但不等于“深加工信息”。</p>
+<h3 id="1-FeedForward：给每个位置一个独立思考空间"><a href="#1-FeedForward：给每个位置一个独立思考空间" class="headerlink" title="1. FeedForward：给每个位置一个独立思考空间"></a>1. FeedForward：给每个位置一个独立思考空间</h3><p>前馈网络通常是两层线性变换加一个非线性激活：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffn = nn.Sequential(</span><br><span class="line">    nn.Linear(emb_dim, <span class="number">4</span> * emb_dim),</span><br><span class="line">    nn.GELU(),</span><br><span class="line">    nn.Linear(<span class="number">4</span> * emb_dim, emb_dim)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>可以把它理解成：</p>
+<ul>
+<li>先把特征空间拉大</li>
+<li>在更高维空间里做非线性变换</li>
+<li>再压回原始维度</li>
+</ul>
+<p>注意力负责“我该看谁”，前馈网络负责“我看完之后怎么理解”。</p>
+<hr>
+<h3 id="2-LayerNorm：深层模型为什么需要“稳压器”"><a href="#2-LayerNorm：深层模型为什么需要“稳压器”" class="headerlink" title="2. LayerNorm：深层模型为什么需要“稳压器”"></a>2. LayerNorm：深层模型为什么需要“稳压器”</h3><p>深层神经网络容易出现数值漂移。<br>一旦某层输出过大或过小，后续层就容易训练不稳定。</p>
+<p>LayerNorm 的作用就是把每个样本在特征维度上标准化：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mean = x.mean(dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">var = x.var(dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>, unbiased=<span class="literal">False</span>)</span><br><span class="line">x_norm = (x - mean) / torch.sqrt(var + eps)</span><br><span class="line">x = gamma * x_norm + beta</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>gamma</code> 和 <code>beta</code> 是可学习参数。<br>这意味着 LayerNorm 不是简单地“抹平一切”，而是在稳定数值之后，仍保留模型重新调节分布的能力。</p>
+<hr>
+<h3 id="3-Residual-Connection：给深层网络一条高速路"><a href="#3-Residual-Connection：给深层网络一条高速路" class="headerlink" title="3. Residual Connection：给深层网络一条高速路"></a>3. Residual Connection：给深层网络一条高速路</h3><p>没有残差连接，深层模型会遇到两个大问题：</p>
+<ul>
+<li>信息在层层变换中被冲淡</li>
+<li>梯度在反向传播中逐层衰减</li>
+</ul>
+<p>残差连接的写法非常简单：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x = x + attention(layernorm(x))</span><br><span class="line">x = x + ffn(layernorm(x))</span><br></pre></td></tr></table></figure>
+
+<p>但意义非常大。<br>它让原始信息可以直接跨层流动，也让梯度可以更顺畅地传回前面层。</p>
+<p>在 Transformer 里，残差连接不是“可选优化”，而是深层训练能够成立的关键条件之一。</p>
+<hr>
+<h2 id="六、输出层：从隐藏状态重新映射回词表"><a href="#六、输出层：从隐藏状态重新映射回词表" class="headerlink" title="六、输出层：从隐藏状态重新映射回词表"></a>六、输出层：从隐藏状态重新映射回词表</h2><p>经过多层 Transformer Block 后，模型手里拿到的是一串隐藏状态向量。<br>这些向量已经融合了上下文信息，但它们还不是最终答案。</p>
+<p>最后一步，是把每个位置上的隐藏状态映射回词表大小：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">logits = lm_head(x)</span><br><span class="line"><span class="comment"># shape: [batch_size, seq_len, vocab_size]</span></span><br></pre></td></tr></table></figure>
+
+<p>如果词表大小是 50,257，那么每个位置都会得到一个长度为 50,257 的分数向量。<br>这个向量里的每一维，都对应一个 token 作为“下一个词”的可能性分数。</p>
+<p>接下来对它做 softmax，就能得到概率分布。</p>
+<hr>
+<h2 id="七、训练循环：模型是怎么从随机变成“会说话”的"><a href="#七、训练循环：模型是怎么从随机变成“会说话”的" class="headerlink" title="七、训练循环：模型是怎么从随机变成“会说话”的"></a>七、训练循环：模型是怎么从随机变成“会说话”的</h2><p>一个刚初始化的 GPT，结构是完整的，但参数是随机的，所以输出也毫无意义。<br>训练的作用，就是不断修正参数，让模型预测越来越接近真实文本分布。</p>
+<h3 id="1-训练的标准四步"><a href="#1-训练的标准四步" class="headerlink" title="1. 训练的标准四步"></a>1. 训练的标准四步</h3><p>训练每个 batch 的过程通常如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">optimizer.zero_grad()</span><br><span class="line"></span><br><span class="line">logits = model(input_ids)</span><br><span class="line">loss = cross_entropy(</span><br><span class="line">    logits.reshape(-<span class="number">1</span>, vocab_size),</span><br><span class="line">    target_ids.reshape(-<span class="number">1</span>)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">loss.backward()</span><br><span class="line">optimizer.step()</span><br></pre></td></tr></table></figure>
+
+<p>这四步分别是：</p>
+<ul>
+<li>清空旧梯度</li>
+<li>前向传播得到预测</li>
+<li>计算损失</li>
+<li>反向传播并更新参数</li>
+</ul>
+<p>整个训练，本质上就是这个过程的大规模重复。</p>
+<hr>
+<h3 id="2-交叉熵损失为什么合适"><a href="#2-交叉熵损失为什么合适" class="headerlink" title="2. 交叉熵损失为什么合适"></a>2. 交叉熵损失为什么合适</h3><p>语言模型在每个位置上，本质都是一次多分类问题：<br>在整个词表中，正确答案只有一个。</p>
+<p>交叉熵损失正好适合度量这种场景。<br>它会惩罚模型“没有把正确答案的概率提上来”。</p>
+<p>直觉上看：</p>
+<ul>
+<li>模型越确信正确 token，损失越小</li>
+<li>模型越把概率给错 token，损失越大</li>
+</ul>
+<p>所以优化交叉熵，本质上是在逼模型学会更接近真实语言分布的概率输出。</p>
+<hr>
+<h3 id="3-为什么训练时要同时看训练损失和验证损失"><a href="#3-为什么训练时要同时看训练损失和验证损失" class="headerlink" title="3. 为什么训练时要同时看训练损失和验证损失"></a>3. 为什么训练时要同时看训练损失和验证损失</h3><p>一个健康训练过程通常是：</p>
+<ul>
+<li>训练损失下降</li>
+<li>验证损失也下降</li>
+</ul>
+<p>如果训练损失越来越低，但验证损失不降反升，通常说明模型开始记忆训练集而不是学习一般规律。</p>
+<p>这也是为什么完整训练流程中，除了主训练循环，通常还会定期插入评估逻辑。</p>
+<hr>
+<h2 id="八、文本生成：训练好之后，模型怎么把句子写出来"><a href="#八、文本生成：训练好之后，模型怎么把句子写出来" class="headerlink" title="八、文本生成：训练好之后，模型怎么把句子写出来"></a>八、文本生成：训练好之后，模型怎么把句子写出来</h2><p>当模型学会了“预测下一个 token”，它就具备了生成能力。<br>生成过程可以理解成一个循环：</p>
+<ol>
+<li>输入当前上下文</li>
+<li>预测下一个 token 概率分布</li>
+<li>选出一个 token</li>
+<li>拼回上下文</li>
+<li>继续下一轮</li>
+</ol>
+<p>最简单版本如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(max_new_tokens):</span><br><span class="line">    logits = model(input_ids)</span><br><span class="line">    next_token_logits = logits[:, -<span class="number">1</span>, :]</span><br><span class="line">    next_token = torch.argmax(next_token_logits, dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">    input_ids = torch.cat([input_ids, next_token], dim=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>但这里的 <code>argmax</code> 其实只是最基础的贪婪解码。</p>
+<hr>
+<h3 id="1-贪婪解码为什么不够好"><a href="#1-贪婪解码为什么不够好" class="headerlink" title="1. 贪婪解码为什么不够好"></a>1. 贪婪解码为什么不够好</h3><p>每次都选概率最大的 token，看起来合理，但实际会带来几个问题：</p>
+<ul>
+<li>输出很容易重复</li>
+<li>结果高度确定，缺乏变化</li>
+<li>常常陷入局部最优，文本呆板</li>
+</ul>
+<p>所以实际生成时，通常会加入更柔性的采样策略。</p>
+<hr>
+<h3 id="2-温度缩放：控制“保守”还是“发散”"><a href="#2-温度缩放：控制“保守”还是“发散”" class="headerlink" title="2. 温度缩放：控制“保守”还是“发散”"></a>2. 温度缩放：控制“保守”还是“发散”</h3><p>温度是在 softmax 之前调整 logits：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">probs = softmax(logits / temperature, dim=-<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>它的作用可以简单理解为：</p>
+<ul>
+<li><code>temperature &lt; 1</code>：更保守，更确定</li>
+<li><code>temperature &gt; 1</code>：更发散，更多样</li>
+</ul>
+<p>温度不是决定生成“对不对”，而是决定模型愿不愿意偏离最高概率答案。</p>
+<hr>
+<h3 id="3-Top-k-采样：只在最靠谱的候选里随机"><a href="#3-Top-k-采样：只在最靠谱的候选里随机" class="headerlink" title="3. Top-k 采样：只在最靠谱的候选里随机"></a>3. Top-k 采样：只在最靠谱的候选里随机</h3><p>为了防止模型在整个大词表里乱抽，常用的办法是只保留前 <code>k</code> 个最高概率候选：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">topk_vals, topk_idx = torch.topk(logits, k=top_k)</span><br><span class="line">probs = softmax(topk_vals / temperature, dim=-<span class="number">1</span>)</span><br><span class="line">sampled = torch.multinomial(probs, num_samples=<span class="number">1</span>)</span><br><span class="line">next_token = topk_idx.gather(-<span class="number">1</span>, sampled)</span><br></pre></td></tr></table></figure>
+
+<p>这样生成时既保留随机性，又不会过度发散到明显不合理的词上。</p>
+<p><strong>配图建议 6：文本生成流程图</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    A[&quot;当前上下文&quot;] --&gt; B[&quot;模型输出 logits&quot;]</span><br><span class="line">    B --&gt; C[&quot;取最后一个位置分数&quot;]</span><br><span class="line">    C --&gt; D[&quot;温度缩放 / Top-k 采样&quot;]</span><br><span class="line">    D --&gt; E[&quot;选出下一个 token&quot;]</span><br><span class="line">    E --&gt; F[&quot;拼回输入序列&quot;]</span><br><span class="line">    F --&gt; A</span><br></pre></td></tr></table></figure>
+
+<p>图注建议：<br>“文本生成本质上是一个循环：预测一个 token，拼回上下文，再继续预测下一个。”</p>
+<hr>
+<h2 id="九、把整条链路串起来：GPT-本质上是一套概率建模流水线"><a href="#九、把整条链路串起来：GPT-本质上是一套概率建模流水线" class="headerlink" title="九、把整条链路串起来：GPT 本质上是一套概率建模流水线"></a>九、把整条链路串起来：GPT 本质上是一套概率建模流水线</h2><p>如果把整个系统放回全局看，一个从零实现的 GPT 其实可以被拆成下面这条链路：</p>
+<ol>
+<li>原始文本经过 tokenizer 变成 token id</li>
+<li>token id 用滑动窗口构造成输入-目标对</li>
+<li>输入经过词嵌入和位置嵌入</li>
+<li>多层 Transformer Block 做上下文融合与特征加工</li>
+<li>输出层把隐藏状态映射回词表分数</li>
+<li>用交叉熵损失训练“下一词预测能力”</li>
+<li>用采样策略把概率分布转成实际文本</li>
+</ol>
+<p>这条链路里，每个模块都不是装饰：</p>
+<ul>
+<li>没有 tokenization，文本无法数值化</li>
+<li>没有位置编码，模型不知道顺序</li>
+<li>没有 causal mask，生成任务会作弊</li>
+<li>没有 LayerNorm 和残差，深层训练很难稳定</li>
+<li>没有采样策略，生成会变得机械乏味</li>
+</ul>
+<p>也正因为这些模块环环相扣，大语言模型才能从一个随机初始化的网络，逐步成长为一个能够建模语言分布的系统。</p>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>真正理解大语言模型，不一定要从超大参数、分布式训练和工业框架开始。<br>很多时候，一份足够小但结构完整的代码实现，反而更容易帮助我们建立“结构化理解”。</p>
+<p>当我们沿着数据准备、嵌入表示、注意力计算、训练优化和文本生成这条主线走完一遍，就会发现：LLM 并不是神秘黑盒，而是一套目标明确、模块清晰、彼此协作的工程系统。</p>
+<p>它真正复杂的地方，不在于某一个公式，而在于这些模块如何共同工作，最终让模型具备“根据上文预测下文”的能力。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -206,7 +534,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2026-05-04 00:10:09 / 修改时间：00:11:29" itemprop="dateCreated datePublished" datetime="2026-05-04T00:10:09+08:00">2026-05-04</time>
+      <time title="创建时间：2026-05-04 00:10:09 / 修改时间：00:41:29" itemprop="dateCreated datePublished" datetime="2026-05-04T00:10:09+08:00">2026-05-04</time>
     </span>
 
   
