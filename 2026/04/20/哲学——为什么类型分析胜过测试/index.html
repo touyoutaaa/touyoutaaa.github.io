@@ -1,242 +1,126 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.1">
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
+<html>
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 字体 (霞鹜文楷 LXGW WenKai Webfont) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.min.css" />
+  <!-- favicon -->
+  <link rel="shortcut icon" href="/images/favicon.png">
+<link rel="stylesheet" href="/css/style.css">
 
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"touyoutaaa.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
-
-    <meta name="description" content="一、类型状态模式（Typestate Pattern）12345678910111213141516171819202122232425use std::marker::PhantomData;struct Disconnected;struct Connected;struct Socket&lt;State&gt; &#123;    fd: i32,    _state: PhantomD">
-<meta property="og:type" content="article">
-<meta property="og:title" content="哲学——为什么类型分析胜过测试[RustTraining]">
-<meta property="og:url" content="https://touyoutaaa.github.io/2026/04/20/%E5%93%B2%E5%AD%A6%E2%80%94%E2%80%94%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E5%88%86%E6%9E%90%E8%83%9C%E8%BF%87%E6%B5%8B%E8%AF%95/index.html">
-<meta property="og:site_name" content="云辇103">
-<meta property="og:description" content="一、类型状态模式（Typestate Pattern）12345678910111213141516171819202122232425use std::marker::PhantomData;struct Disconnected;struct Connected;struct Socket&lt;State&gt; &#123;    fd: i32,    _state: PhantomD">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://touyoutaaa.github.io/images/ChatGPT%20Image%202026%E5%B9%B44%E6%9C%8827%E6%97%A5%2002_33_12.png">
-<meta property="article:published_time" content="2026-04-20T09:53:33.000Z">
-<meta property="article:modified_time" content="2026-04-26T18:42:17.241Z">
-<meta property="article:author" content="touyoutaaa">
-<meta property="article:tag" content="Rust">
-<meta property="article:tag" content="RustTraining">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://touyoutaaa.github.io/images/ChatGPT%20Image%202026%E5%B9%B44%E6%9C%8827%E6%97%A5%2002_33_12.png">
-
-
-<link rel="canonical" href="https://touyoutaaa.github.io/2026/04/20/%E5%93%B2%E5%AD%A6%E2%80%94%E2%80%94%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E5%88%86%E6%9E%90%E8%83%9C%E8%BF%87%E6%B5%8B%E8%AF%95/">
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://touyoutaaa.github.io/2026/04/20/%E5%93%B2%E5%AD%A6%E2%80%94%E2%80%94%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E5%88%86%E6%9E%90%E8%83%9C%E8%BF%87%E6%B5%8B%E8%AF%95/","path":"2026/04/20/哲学——为什么类型分析胜过测试/","title":"哲学——为什么类型分析胜过测试[RustTraining]"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>哲学——为什么类型分析胜过测试[RustTraining] | 云辇103</title>
+  <!-- activeTitle -->
+  
+  <!-- inactiveTitle -->
   
 
+  <title>哲学——为什么类型分析胜过测试[RustTraining]</title>
+  <!-- 注入配置到全局变量 -->
+  <script>
+    window.SITE_CONFIG = {
+      root: '/',
+      activeTitle: '哲学——为什么类型分析胜过测试[RustTraining]',
+      inactiveTitle: 'touyoutaaa',
+      gsap: {"enable":true,"entrance_stagger":0.08,"scroll_trigger":true,"parallax":true,"hover_effect":true}
+    };
+  </script>
 
+  <!-- 引入 GSAP 核心库及 ScrollTrigger 插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-
-
-
-
-
+  <!-- 加载JS文件 -->
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
-<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+<script src="/js/head.js"></script>
+<script src="/js/iconfont.js"></script>
+<script src="/js/header.js"></script>
 
-  
+<meta name="generator" content="Hexo 8.1.1"></head>
 
-  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
-  <script src="/js/third-party/tags/mermaid.js" defer></script>
-
-
-
-
-
-  
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-    </div>
+  <body class="">
+    <div id="swiper-container">
+  <img
+    src="/images/swiper.jpg"
+    alt="Love Life Love Coding Love You" />
+  <div class="shadow"></div>
+  <div class="hero-copy">
+    <p class="hero-kicker">HOME</p>
+    <h1
+      class="hero-title"
+      data-typewriter="Love Life Love Coding Love You"
+      aria-label="Love Life Love Coding Love You"></h1>
   </div>
+</div>
 
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">云辇103</p>
-      <i class="logo-line"></i>
+    <div class="body-page-view"><div id="header-container" class="header-top">
+  <div class="logo">
+    <a href="/">
+       云辇103 
     </a>
-      <p class="site-subtitle" itemprop="description">Love Life Love Coding Love You</p>
   </div>
 
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
-</div>
+  <button class="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
+    <span class="line line-1"></span>
+    <span class="line line-2"></span>
+    <span class="line line-3"></span>
+  </button>
 
-
-
-<nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
-  </ul>
-</nav>
-
-
-
-
-</header>
-        
-  
-  <aside class="sidebar">
-
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%B1%BB%E5%9E%8B%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F%EF%BC%88Typestate-Pattern%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">一、类型状态模式（Typestate Pattern）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E7%9B%B4%E7%99%BD%E8%A7%A3%E9%87%8A"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 直白解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-%E5%AE%9A%E4%B9%89%E4%B8%8D%E5%90%8C%E7%9A%84%E7%8A%B6%E6%80%81%EF%BC%88%E6%A0%87%E7%AD%BE%EF%BC%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">1.2.1 定义不同的状态（标签）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-%E8%AE%A9-Socket-%E6%90%BA%E5%B8%A6%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">1.2.2 让 Socket 携带状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-3-%E4%B8%BA%E4%B8%8D%E5%90%8C%E7%8A%B6%E6%80%81%E5%AE%9E%E7%8E%B0%E4%B8%8D%E5%90%8C%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.3.</span> <span class="nav-text">1.2.3 为不同状态实现不同的方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 代码示例对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-%E4%BC%98%E5%8A%BF%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 优势总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%80%9A%E8%BF%87%E5%85%B3%E8%81%94%E7%B1%BB%E5%9E%8B%E7%A1%AE%E4%BF%9D%E5%8D%8F%E8%AE%AE%E6%AD%A3%E7%A1%AE%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">二、通过关联类型确保协议正确性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87%EF%BC%9A%E7%BB%91%E5%AE%9A%E2%80%9D%E8%AF%B7%E6%B1%82%E2%80%9D%E4%B8%8E%E2%80%9D%E5%93%8D%E5%BA%94%E2%80%9D"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 核心目标：绑定”请求”与”响应”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E4%BB%A3%E7%A0%81%E9%80%90%E6%AE%B5%E8%A7%A3%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 代码逐段解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-%E5%AE%9A%E4%B9%89-Trait%EF%BC%88%E5%8D%8F%E8%AE%AE%E9%AA%A8%E6%9E%B6%EF%BC%89"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.2.1 定义 Trait（协议骨架）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-%E5%85%B7%E4%BD%93%E5%91%BD%E4%BB%A4%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2.2 具体命令实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-%E6%B3%9B%E5%9E%8B%E6%89%A7%E8%A1%8C%E5%87%BD%E6%95%B0"><span class="nav-number">2.2.3.</span> <span class="nav-text">2.2.3 泛型执行函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E8%BF%99%E5%AE%9E%E7%8E%B0%E4%BA%86%E2%80%9D%E5%8D%8F%E8%AE%AE%E6%AD%A3%E7%A1%AE%E6%80%A7%E2%80%9D%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 为什么说这实现了”协议正确性”？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E7%A1%AC%E4%BB%B6%E5%B1%82%E9%9D%A2%E7%9A%84%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 硬件层面的实际应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-%E6%80%BB%E7%BB%93"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 总结</span></a></li></ol></li></ol></div>
-        </div>
-        <!--/noindex-->
-
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="touyoutaaa"
-      src="/images/avatar.jpg">
-  <p class="site-author-name" itemprop="name">touyoutaaa</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">7</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-          <a href="/tags/">
-        <span class="site-state-item-count">5</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
+  <nav class="nav-menu">
+    <ul class="nav-list">
+       
+      <li>
+        <a href="/">首页</a>
+      </li>
+      
+      <li>
+        <a href="/posts/">文章</a>
+      </li>
+      
+      <li>
+        <a href="/stats/">统计</a>
+      </li>
+      
+      <li>
+        <a href="/about/">关于</a>
+      </li>
+       
+    </ul>
   </nav>
 </div>
-  <div class="links-of-author animated">
-      <span class="links-of-author-item">
-        <a href="https://github.com/touyoutaaa" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;touyoutaaa" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-  </div>
 
-        </div>
-      </div>
-    </div>
-
-    
-  </aside>
-
-
-    </div>
-
-    <div class="main-inner post posts-expand">
-
-
-  
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://touyoutaaa.github.io/2026/04/20/%E5%93%B2%E5%AD%A6%E2%80%94%E2%80%94%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E5%88%86%E6%9E%90%E8%83%9C%E8%BF%87%E6%B5%8B%E8%AF%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="touyoutaaa">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="云辇103">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="哲学——为什么类型分析胜过测试[RustTraining] | 云辇103">
-      <meta itemprop="description" content="">
-    </span>
+<div class="post-page">
+  <main class="post-container">
+    <article class="post-article">
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          哲学——为什么类型分析胜过测试[RustTraining]
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2026-04-20 17:53:33" itemprop="dateCreated datePublished" datetime="2026-04-20T17:53:33+08:00">2026-04-20</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-27 02:42:17" itemprop="dateModified" datetime="2026-04-27T02:42:17+08:00">2026-04-27</time>
-    </span>
-
-  
-</div>
-
+        <h1 class="post-title">哲学——为什么类型分析胜过测试[RustTraining]</h1>
+        <div class="post-meta">
+          <div class="meta-item">
+            <p class="post-time">2026-04-20 17:53</p>
+          </div>
+           
+          <p class="meta-item">
+            <a class="post-tag-none-link" href="/tags/Rust/" rel="tag">Rust</a>, <a class="post-tag-none-link" href="/tags/RustTraining/" rel="tag">RustTraining</a>
+          </p>
+          
         </div>
       </header>
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p><img src="/images/ChatGPT%20Image%202026%E5%B9%B44%E6%9C%8827%E6%97%A5%2002_33_12.png" alt="alt text"></p>
+      <div class="post-content"><p><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/ChatGPT%20Image%202026%E5%B9%B44%E6%9C%8827%E6%97%A5%2002_33_12.png" 
+       alt="alt text" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div></p>
 <h1 id="一、类型状态模式（Typestate-Pattern）"><a href="#一、类型状态模式（Typestate-Pattern）" class="headerlink" title="一、类型状态模式（Typestate Pattern）"></a>一、类型状态模式（Typestate Pattern）</h1><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::marker::PhantomData;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Disconnected</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Connected</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Socket</span>&lt;State&gt; &#123;</span><br><span class="line">    fd: <span class="type">i32</span>,</span><br><span class="line">    _state: PhantomData&lt;State&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Socket</span>&lt;Disconnected&gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">connect</span>(<span class="keyword">self</span>, addr: &amp;<span class="type">str</span>) <span class="punctuation">-&gt;</span> Socket&lt;Connected&gt; &#123;</span><br><span class="line">        <span class="comment">// ... connect logic ...</span></span><br><span class="line">        Socket &#123; fd: <span class="keyword">self</span>.fd, _state: PhantomData &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Socket</span>&lt;Connected&gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">send</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, data: &amp;[<span class="type">u8</span>]) &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">disconnect</span>(<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> Socket&lt;Disconnected&gt; &#123;</span><br><span class="line">        Socket &#123; fd: <span class="keyword">self</span>.fd, _state: PhantomData &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Socket&lt;Disconnected&gt; has no send() method — compile error if you try</span></span><br></pre></td></tr></table></figure>
 
 <p>这段代码展示了 Rust 中一种非常高级且强大的设计模式，叫做 <strong>Typestate Pattern（类型状态模式）</strong>。</p>
@@ -307,75 +191,123 @@
 </ul>
 <h2 id="2-5-总结"><a href="#2-5-总结" class="headerlink" title="2.5 总结"></a>2.5 总结</h2><p>这段代码演示了如何利用 Rust 的 <strong>Trait</strong> 和 <strong>Associated Types</strong> 来建模复杂的交互协议。它将”运行时的协议逻辑错误”转换成了”编译时的类型错误”，从而保证了程序的绝对健壮性。</p>
 <p><strong>核心思想：把”逻辑错误”变成”语法错误”。</strong></p>
-
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Rust/" rel="tag"># Rust</a>
-              <a href="/tags/RustTraining/" rel="tag"># RustTraining</a>
-          </div>
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2026/04/20/Rust%E4%B8%9A%E5%8A%A1%E5%BC%80%E5%8F%91%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" rel="prev" title="Rust业务开发最佳实践">
-                  <i class="fa fa-angle-left"></i> Rust业务开发最佳实践
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2026/04/20/RAG%E6%A6%82%E8%A7%88/" rel="next" title="RAG概览">
-                  RAG概览 <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
 </div>
 
-
-
-
-
-
-</div>
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+          <div class="post-nav-prev">
+            <i class="fa fa-chevron-left"></i>
+            <a href="/2026/04/20/RAG%E6%A6%82%E8%A7%88/" rel="prev">
+              RAG概览
+            </a>
+          </div>
+           
+          <div class="post-nav-next">
+            <a href="/2026/04/20/Rust%E4%B8%9A%E5%8A%A1%E5%BC%80%E5%8F%91%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" rel="next">
+              Rust业务开发最佳实践
+            </a>
+            <i class="fa fa-chevron-right"></i>
+          </div>
+          
+        </div>
+      </footer>
+    </article>
   </main>
 
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-heart"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">touyoutaaa</span>
-  </div>
-
-    </div>
-  </footer>
-
+  <nav class="pagination">
   
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
+  <div class="pagination-placeholder"></div>
+  
+</nav>
 
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
+</div>
+</div>
+    <footer class="footer-container">
+  <div class="footer-content">
+    <p class="footer-text">
+      © 2026
+      <a href="https://github.com/touyoutaaa" target="_blank">touyoutaaa</a>.
+      All Rights Reserved.
+    </p>
+  </div>
+</footer>
 
-</body>
+
+    <div class="to-top">
+  <svg class="icon" aria-hidden="true">
+    <use xlink:href="#icon-arrowup"></use>
+  </svg>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toTop = document.querySelector('.to-top');
+    if (!toTop) return;
+
+    const hasGsap = typeof gsap !== 'undefined';
+
+    if (hasGsap) {
+      // 初始隐藏状态
+      gsap.set(toTop, { opacity: 0, scale: 0.6, display: 'none' });
+      
+      let isVisible = false;
+
+      window.addEventListener('scroll', function () {
+        const shouldShow = window.scrollY > window.innerHeight;
+        
+        if (shouldShow && !isVisible) {
+          isVisible = true;
+          gsap.killTweensOf(toTop);
+          gsap.set(toTop, { display: 'flex' });
+          gsap.to(toTop, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(1.7)'
+          });
+        } else if (!shouldShow && isVisible) {
+          isVisible = false;
+          gsap.killTweensOf(toTop);
+          gsap.to(toTop, {
+            opacity: 0,
+            scale: 0.6,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+              if (!isVisible) gsap.set(toTop, { display: 'none' });
+            }
+          });
+        }
+      });
+
+      // Hover 交互与磁性效果在 animation.js 中全局托管
+    } else {
+      // 优雅降级：传统滚动监听
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > window.innerHeight) {
+          toTop.style.display = 'flex';
+        } else {
+          toTop.style.display = 'none';
+        }
+      });
+    }
+
+    // 点击事件
+    toTop.addEventListener('click', function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
+  });
+</script>
+
+    
+<script src="/js/animation.js"></script>
+<script src="/js/highlight.js"></script>
+<script src="/js/image-viewer.js"></script>
+<script src="/js/home-hero.js"></script>
+
+  </body>
 </html>
