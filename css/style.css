@@ -718,7 +718,7 @@ body.is-home .home-stack-item {
   display: flex;
   align-items: center;
   flex-direction: row;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   width: 9rem;
@@ -749,7 +749,7 @@ body.is-home .home-stack-item-icon svg {
   fill: currentColor;
 }
 body.is-home .home-stack-item-copy {
-  text-align: center;
+  text-align: left;
 }
 body.is-home .home-stack-item-copy h3 {
   margin: 0;
