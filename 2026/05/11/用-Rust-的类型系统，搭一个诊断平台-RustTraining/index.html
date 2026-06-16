@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 字体 (霞鹜文楷 LXGW WenKai Webfont) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.min.css" />
+  <!-- favicon -->
+  <link rel="shortcut icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <!-- activeTitle -->
+  
+  <!-- inactiveTitle -->
+  
+
+  <title>用 Rust 的类型系统，搭一个诊断平台[RustTraining]</title>
+  <!-- 注入配置到全局变量 -->
+  <script>
+    window.SITE_CONFIG = {
+      root: '/',
+      activeTitle: '用 Rust 的类型系统，搭一个诊断平台[RustTraining]',
+      inactiveTitle: 'touyoutaaa',
+      gsap: {"enable":true,"entrance_stagger":0.08,"scroll_trigger":true,"parallax":true,"hover_effect":true}
+    };
+  </script>
+
+  <!-- 引入 GSAP 核心库及 ScrollTrigger 插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- 加载JS文件 -->
+  
+<script src="/js/head.js"></script>
+<script src="/js/iconfont.js"></script>
+<script src="/js/header.js"></script>
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body class="">
+    <div id="swiper-container">
+  <img src="/images/swiper.png" alt="轮播图" />
+  <div class="shadow"></div>
+  <div class="hero-copy">
+    <p class="hero-kicker">HOME</p>
+    <h1 class="hero-title" data-typewriter="Love Life Love Coding Love You" aria-label="Love Life Love Coding Love You">
+    </h1>
+  </div>
+</div>
+    <div class="body-page-view"><div id="header-container" class="header-top">
+  <div class="logo">
+    <a href="/">
+       云辇103 
+    </a>
+  </div>
+
+  <button class="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
+    <span class="line line-1"></span>
+    <span class="line line-2"></span>
+    <span class="line line-3"></span>
+  </button>
+
+  <nav class="nav-menu">
+    <ul class="nav-list">
+       
+      <li>
+        <a href="/">首页</a>
+      </li>
+      
+      <li>
+        <a href="/posts">文章</a>
+      </li>
+      
+      <li>
+        <a href="/stats">统计</a>
+      </li>
+      
+      <li>
+        <a href="/about">关于</a>
+      </li>
+       
+    </ul>
+  </nav>
+</div>
+
+<div class="post-page">
+  <main class="post-container">
+    <article class="post-article">
+      <header class="post-header">
+        <h1 class="post-title">用 Rust 的类型系统，搭一个诊断平台[RustTraining]</h1>
+        <div class="post-meta">
+          <div class="meta-item">
+            <p class="post-time">2026-05-11 15:46</p>
+          </div>
+           
+          <p class="meta-item">
+            <a class="post-tag-none-link" href="/tags/Rust/" rel="tag">Rust</a>, <a class="post-tag-none-link" href="/tags/RustTraining/" rel="tag">RustTraining</a>
+          </p>
+          
+        </div>
+      </header>
+
+      <div class="post-content"><h1 id="用-Rust-的类型系统，搭一个诊断平台"><a href="#用-Rust-的类型系统，搭一个诊断平台" class="headerlink" title="用 Rust 的类型系统，搭一个诊断平台"></a>用 Rust 的类型系统，搭一个诊断平台</h1><p>很多人第一次接触 Rust，会把注意力放在所有权、生命周期、<code>Result</code>、<code>trait</code> 这些语言特性上。<br>但如果只停在这里，其实只学到了 Rust 的“语法层”。</p>
+<p>Rust 真正厉害的地方，是你可以把很多<strong>业务约束</strong>直接编码进类型系统里，让一部分错误根本写不出来。</p>
+<p>这篇文章想讨论一个非常实用的问题：</p>
+<blockquote>
+<p>如果我们要写一个服务器诊断平台，怎么用 Rust 的类型系统，把认证、会话状态、命令响应、数据校验、寄存器宽度这些规则都放进编译期？</p>
+</blockquote>
+<p>这正是微软那本 <em>Type-Driven Correctness in Rust</em> 在第 10 章做的事情。它把前面几章分散的模式组合起来，搭出了一个完整的诊断工作流：</p>
+<ol>
+<li>认证拿到能力令牌</li>
+<li>打开会话并进入激活状态</li>
+<li>发送类型安全的命令</li>
+<li>用一次性 token 做审计</li>
+<li>返回带单位的结果</li>
+<li>校验 FRU 边界数据</li>
+<li>读取带 phantom type 的寄存器</li>
+</ol>
+<p>看起来像很多技巧，但它们放在一起，目标其实只有一个：</p>
+<p><strong>让错误的使用方式在编译阶段就被排除。</strong></p>
+<hr>
+<h2 id="先看目标：我们想防住哪些错误？"><a href="#先看目标：我们想防住哪些错误？" class="headerlink" title="先看目标：我们想防住哪些错误？"></a>先看目标：我们想防住哪些错误？</h2><p>假设我们在做一个 IPMI 风格的诊断模块，最常见的问题大概有这些：</p>
+<ul>
+<li>没认证就去激活会话</li>
+<li>会话还没准备好就发命令</li>
+<li>温度和转速都用 <code>f64</code>，结果混着传</li>
+<li>收到的原始 FRU 数据还没校验就开始解析</li>
+<li>本该读 16 位寄存器，却当成 32 位来读</li>
+<li>一次性的审计 token 被重复使用</li>
+</ul>
+<p>如果这些约束全靠注释、文档、或者 <code>if</code> 判断来维护，系统一大就会开始漏。</p>
+<p>所以更好的办法是：<strong>把正确流程写进类型里。</strong></p>
+<hr>
+<h2 id="1-用-typed-command-约束“请求决定响应”"><a href="#1-用-typed-command-约束“请求决定响应”" class="headerlink" title="1. 用 typed command 约束“请求决定响应”"></a>1. 用 typed command 约束“请求决定响应”</h2><p>很多协议代码会写成这样：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">send_command</span>(cmd: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;<span class="type">Vec</span>&lt;<span class="type">u8</span>&gt;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这种设计的问题是，命令和响应之间没有类型关联。<br>调用者必须“自己记住”某个命令返回的到底是温度、风扇转速，还是电压。</p>
+<p>我们换一种方式，把命令建模成 trait：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::io;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Celsius</span>(<span class="keyword">pub</span> <span class="type">f64</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Rpm</span>(<span class="keyword">pub</span> <span class="type">f64</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title class_">IpmiCmd</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">net_fn</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span>;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">cmd_byte</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span>;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">payload</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">u8</span>&gt;;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;<span class="keyword">Self</span>::Response&gt;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里最关键的是这句：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Response</span>;</span><br></pre></td></tr></table></figure>
+
+<p>它把“这个命令对应什么返回值”直接绑定到了类型层。</p>
+<p>比如读取温度：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">ReadTemp</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> sensor_id: <span class="type">u8</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">IpmiCmd</span> <span class="keyword">for</span> <span class="title class_">ReadTemp</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span> = Celsius;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">net_fn</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123; <span class="number">0x04</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">cmd_byte</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123; <span class="number">0x2D</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">payload</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">u8</span>&gt; &#123; <span class="built_in">vec!</span>[<span class="keyword">self</span>.sensor_id] &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;Celsius&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> raw.<span class="title function_ invoke__">is_empty</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">Err</span>(io::Error::<span class="title function_ invoke__">new</span>(io::ErrorKind::InvalidData, <span class="string">&quot;empty response&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(<span class="title function_ invoke__">Celsius</span>(raw[<span class="number">0</span>] <span class="keyword">as</span> <span class="type">f64</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再比如读取风扇转速：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">ReadFanSpeed</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> fan_id: <span class="type">u8</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">IpmiCmd</span> <span class="keyword">for</span> <span class="title class_">ReadFanSpeed</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span> = Rpm;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">net_fn</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123; <span class="number">0x04</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">cmd_byte</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123; <span class="number">0x2D</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">payload</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">u8</span>&gt; &#123; <span class="built_in">vec!</span>[<span class="keyword">self</span>.fan_id] &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;Rpm&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> raw.<span class="title function_ invoke__">len</span>() &lt; <span class="number">2</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">Err</span>(io::Error::<span class="title function_ invoke__">new</span>(io::ErrorKind::InvalidData, <span class="string">&quot;need 2 bytes&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(<span class="title function_ invoke__">Rpm</span>(<span class="type">u16</span>::<span class="title function_ invoke__">from_le_bytes</span>([raw[<span class="number">0</span>], raw[<span class="number">1</span>]]) <span class="keyword">as</span> <span class="type">f64</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样设计之后，调用方拿到的类型是编译器推出来的，而不是靠人脑记忆。</p>
+<hr>
+<h2 id="2-用-capability-token-表达“你有没有资格做这件事”"><a href="#2-用-capability-token-表达“你有没有资格做这件事”" class="headerlink" title="2. 用 capability token 表达“你有没有资格做这件事”"></a>2. 用 capability token 表达“你有没有资格做这件事”</h2><p>很多系统喜欢这么写权限控制：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">activate_session</span>(is_admin: <span class="type">bool</span>) <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;(), Error&gt;</span><br></pre></td></tr></table></figure>
+
+<p>问题是 <code>bool</code> 太弱了。<br>它没有任何上下文，也不能证明这个权限是怎么来的。</p>
+<p>我们可以把“管理员权限”变成一个<strong>能力令牌</strong>：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">AdminToken</span> &#123;</span><br><span class="line">    _private: (),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">authenticate</span>(user: &amp;<span class="type">str</span>, pass: &amp;<span class="type">str</span>) <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;AdminToken, &amp;<span class="symbol">&#x27;static</span> <span class="type">str</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> user == <span class="string">&quot;admin&quot;</span> &amp;&amp; pass == <span class="string">&quot;secret&quot;</span> &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(AdminToken &#123; _private: () &#125;)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="title function_ invoke__">Err</span>(<span class="string">&quot;authentication failed&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>AdminToken</code> 不能随便构造，只能通过 <code>authenticate()</code> 拿到。<br>这就意味着后续 API 可以直接要求它：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">do_sensitive_thing</span>(_admin: &amp;AdminToken) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果手里没有 <code>AdminToken</code>，这段代码连调用资格都没有。</p>
+<hr>
+<h2 id="3-用-typestate-限制“什么状态下能做什么事”"><a href="#3-用-typestate-限制“什么状态下能做什么事”" class="headerlink" title="3. 用 typestate 限制“什么状态下能做什么事”"></a>3. 用 typestate 限制“什么状态下能做什么事”</h2><p>协议会话天然就是状态机。<br>比如一个 IPMI 会话至少会经历：</p>
+<ul>
+<li><code>Idle</code></li>
+<li><code>Active</code></li>
+</ul>
+<p>如果你把所有操作都挂在一个 <code>Session</code> 上，然后运行时判断当前状态，代码很容易写出非法调用顺序。</p>
+<p>更好的做法是：<strong>把状态放进类型参数。</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::marker::PhantomData;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Idle</span>;</span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Active</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Session</span>&lt;State&gt; &#123;</span><br><span class="line">    host: <span class="type">String</span>,</span><br><span class="line">    _state: PhantomData&lt;State&gt;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>连接之后先得到 <code>Session&lt;Idle&gt;</code>：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> <span class="title class_">Session</span>&lt;Idle&gt; &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">connect</span>(host: &amp;<span class="type">str</span>) <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">        Session &#123;</span><br><span class="line">            host: host.<span class="title function_ invoke__">to_string</span>(),</span><br><span class="line">            _state: PhantomData,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">activate</span>(<span class="keyword">self</span>, _admin: &amp;AdminToken) <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;Session&lt;Active&gt;, <span class="type">String</span>&gt; &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;Session activated on &#123;&#125;&quot;</span>, <span class="keyword">self</span>.host);</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(Session &#123;</span><br><span class="line">            host: <span class="keyword">self</span>.host,</span><br><span class="line">            _state: PhantomData,</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>真正执行命令的方法，只存在于 <code>Session&lt;Active&gt;</code> 上：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> <span class="title class_">Session</span>&lt;Active&gt; &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">execute</span>&lt;C: IpmiCmd&gt;(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, cmd: &amp;C) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;C::Response&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">raw</span> = <span class="keyword">self</span>.<span class="title function_ invoke__">raw_send</span>(cmd.<span class="title function_ invoke__">net_fn</span>(), cmd.<span class="title function_ invoke__">cmd_byte</span>(), &amp;cmd.<span class="title function_ invoke__">payload</span>())?;</span><br><span class="line">        cmd.<span class="title function_ invoke__">parse_response</span>(&amp;raw)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">raw_send</span>(&amp;<span class="keyword">self</span>, _nf: <span class="type">u8</span>, _cmd: <span class="type">u8</span>, _data: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;<span class="type">Vec</span>&lt;<span class="type">u8</span>&gt;&gt; &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(<span class="built_in">vec!</span>[<span class="number">42</span>, <span class="number">0x1E</span>])</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">close</span>(<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;Session closed&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这意味着下面这种错误在编译期就会被挡住：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">session</span> = Session::&lt;Idle&gt;::<span class="title function_ invoke__">connect</span>(<span class="string">&quot;192.168.1.100&quot;</span>);</span><br><span class="line"><span class="comment">// session.execute(&amp;ReadTemp &#123; sensor_id: 0 &#125;); // 编译不过</span></span><br></pre></td></tr></table></figure>
+
+<p>因为 <code>execute()</code> 根本不属于 <code>Session&lt;Idle&gt;</code>。</p>
+<hr>
+<h2 id="4-用-newtype-表达“单位不同就是不同类型”"><a href="#4-用-newtype-表达“单位不同就是不同类型”" class="headerlink" title="4. 用 newtype 表达“单位不同就是不同类型”"></a>4. 用 newtype 表达“单位不同就是不同类型”</h2><p>很多监控&#x2F;诊断系统里最危险的一类 bug，不是崩溃，而是<strong>数值语义混淆</strong>。</p>
+<p>比如：</p>
+<ul>
+<li>温度是摄氏度</li>
+<li>风扇是转速 RPM</li>
+<li>电压是 Volt</li>
+</ul>
+<p>如果全都用 <code>f64</code>，编译器根本分不清。</p>
+<p>我们用简单的 newtype 包起来：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Celsius</span>(<span class="keyword">pub</span> <span class="type">f64</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Rpm</span>(<span class="keyword">pub</span> <span class="type">f64</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Volts</span>(<span class="keyword">pub</span> <span class="type">f64</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这看起来只是多包了一层，但编译器会立刻帮你防住类型串线：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">temp</span>: Celsius = session.<span class="title function_ invoke__">execute</span>(&amp;ReadTemp &#123; sensor_id: <span class="number">0</span> &#125;)?;</span><br><span class="line"><span class="comment">// let wrong: Volts = session.execute(&amp;ReadTemp &#123; sensor_id: 0 &#125;)?;</span></span><br><span class="line"><span class="comment">// error: expected Volts, found Celsius</span></span><br></pre></td></tr></table></figure>
+
+<p>这就是“让单位进入类型系统”的价值。</p>
+<hr>
+<h2 id="5-用单次消费类型保证审计-token-不能复用"><a href="#5-用单次消费类型保证审计-token-不能复用" class="headerlink" title="5. 用单次消费类型保证审计 token 不能复用"></a>5. 用单次消费类型保证审计 token 不能复用</h2><p>有些资源天生就应该“一次性使用”。<br>比如一个审计事件 token，要求每次诊断只写入一次，不允许复用。</p>
+<p>Rust 的 move 语义特别适合表达这种约束：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">AuditToken</span> &#123;</span><br><span class="line">    run_id: <span class="type">u64</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">AuditToken</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">issue</span>(run_id: <span class="type">u64</span>) <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">        AuditToken &#123; run_id &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">log</span>(<span class="keyword">self</span>, message: &amp;<span class="type">str</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;[AUDIT run_id=&#123;&#125;] &#123;&#125;&quot;</span>, <span class="keyword">self</span>.run_id, message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意 <code>log(self, ...)</code> 会消费掉 <code>self</code>。<br>所以一旦调用完成，这个 token 就不能再用了：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">audit</span> = AuditToken::<span class="title function_ invoke__">issue</span>(<span class="number">1001</span>);</span><br><span class="line">audit.<span class="title function_ invoke__">log</span>(<span class="string">&quot;diagnostic report written&quot;</span>);</span><br><span class="line"><span class="comment">// audit.log(&quot;write again&quot;); // 编译不过，value moved</span></span><br></pre></td></tr></table></figure>
+
+<p>这种“只能发生一次”的约束，不需要额外 runtime flag，所有权系统天然就能表达。</p>
+<hr>
+<h2 id="6-用-validated-boundary-把“不可信输入”拦在边界"><a href="#6-用-validated-boundary-把“不可信输入”拦在边界" class="headerlink" title="6. 用 validated boundary 把“不可信输入”拦在边界"></a>6. 用 validated boundary 把“不可信输入”拦在边界</h2><p>FRU、网络包、磁盘块、用户输入，这些外部数据都不应该直接进业务逻辑。<br>更好的模式是：</p>
+<p><strong>原始数据先校验，校验通过后才变成领域对象。</strong></p>
+<p>比如一个简化版 FRU：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">ValidFru</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> board_serial: <span class="type">String</span>,</span><br><span class="line">    <span class="keyword">pub</span> product_name: <span class="type">String</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">ValidFru</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">parse</span>(raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;<span class="keyword">Self</span>, &amp;<span class="symbol">&#x27;static</span> <span class="type">str</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> raw.<span class="title function_ invoke__">len</span>() &lt; <span class="number">8</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">Err</span>(<span class="string">&quot;FRU too short&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> raw[<span class="number">0</span>] != <span class="number">0x01</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">Err</span>(<span class="string">&quot;bad FRU version&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(ValidFru &#123;</span><br><span class="line">            board_serial: <span class="string">&quot;SN12345&quot;</span>.<span class="title function_ invoke__">to_string</span>(),</span><br><span class="line">            product_name: <span class="string">&quot;ServerX&quot;</span>.<span class="title function_ invoke__">to_string</span>(),</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用方式也很清楚：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">raw_fru</span> = <span class="built_in">vec!</span>[<span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0xFD</span>];</span><br><span class="line"><span class="keyword">let</span> <span class="variable">fru</span> = ValidFru::<span class="title function_ invoke__">parse</span>(&amp;raw_fru)?;</span><br></pre></td></tr></table></figure>
+
+<p>重点不在于这个 demo 校验有多复杂，而在于：<br><strong>后续代码拿到的是 <code>ValidFru</code>，不是随便一段 <code>&amp;[u8]</code>。</strong></p>
+<p>也就是说，“校验过没有”不再靠注释，而是靠类型表达。</p>
+<hr>
+<h2 id="7-用-phantom-type-表达“运行时没有，但语义上很重要”的信息"><a href="#7-用-phantom-type-表达“运行时没有，但语义上很重要”的信息" class="headerlink" title="7. 用 phantom type 表达“运行时没有，但语义上很重要”的信息"></a>7. 用 phantom type 表达“运行时没有，但语义上很重要”的信息</h2><p>有些信息不会体现在结构体字段里，但对 API 正确性至关重要。<br>寄存器宽度就是一个很典型的例子。</p>
+<p>我们可以这样建模：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Width16</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Reg</span>&lt;W&gt; &#123;</span><br><span class="line">    offset: <span class="type">u16</span>,</span><br><span class="line">    _w: PhantomData&lt;W&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Reg</span>&lt;Width16&gt; &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">read</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u16</span> &#123;</span><br><span class="line">        <span class="number">0x8086</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Width16</code> 不占运行时空间，但它告诉编译器：<br>这个寄存器就是 16 位的，所以 <code>read()</code> 的返回值应该是 <code>u16</code>。</p>
+<p>把它放进设备模型里：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">PcieDev</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> vendor_id: Reg&lt;Width16&gt;,</span><br><span class="line">    <span class="keyword">pub</span> device_id: Reg&lt;Width16&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">PcieDev</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">new</span>() <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">        PcieDev &#123;</span><br><span class="line">            vendor_id: Reg &#123; offset: <span class="number">0x00</span>, _w: PhantomData &#125;,</span><br><span class="line">            device_id: Reg &#123; offset: <span class="number">0x02</span>, _w: PhantomData &#125;,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样读取时就不会“忘了这个寄存器本来多宽”。</p>
+<hr>
+<h2 id="8-把这些模式拼起来：一个完整的诊断流程"><a href="#8-把这些模式拼起来：一个完整的诊断流程" class="headerlink" title="8. 把这些模式拼起来：一个完整的诊断流程"></a>8. 把这些模式拼起来：一个完整的诊断流程</h2><p>前面每个点单独看都不算复杂，真正有意思的是它们组合起来之后会变成什么样。</p>
+<p>下面是一个简化后的完整流程：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::io;</span><br><span class="line"><span class="keyword">use</span> std::marker::PhantomData;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Celsius</span>(<span class="keyword">pub</span> <span class="type">f64</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Rpm</span>(<span class="keyword">pub</span> <span class="type">f64</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title class_">IpmiCmd</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span>;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">net_fn</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span>;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">cmd_byte</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span>;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">payload</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">u8</span>&gt;;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;<span class="keyword">Self</span>::Response&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">ReadTemp</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> sensor_id: <span class="type">u8</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">IpmiCmd</span> <span class="keyword">for</span> <span class="title class_">ReadTemp</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span> = Celsius;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">net_fn</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123; <span class="number">0x04</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">cmd_byte</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123; <span class="number">0x2D</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">payload</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">u8</span>&gt; &#123; <span class="built_in">vec!</span>[<span class="keyword">self</span>.sensor_id] &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;Celsius&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> raw.<span class="title function_ invoke__">is_empty</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">Err</span>(io::Error::<span class="title function_ invoke__">new</span>(io::ErrorKind::InvalidData, <span class="string">&quot;empty&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(<span class="title function_ invoke__">Celsius</span>(raw[<span class="number">0</span>] <span class="keyword">as</span> <span class="type">f64</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">ReadFanSpeed</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> fan_id: <span class="type">u8</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">IpmiCmd</span> <span class="keyword">for</span> <span class="title class_">ReadFanSpeed</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Response</span> = Rpm;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">net_fn</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123; <span class="number">0x04</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">cmd_byte</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u8</span> &#123; <span class="number">0x2D</span> &#125;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">payload</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">u8</span>&gt; &#123; <span class="built_in">vec!</span>[<span class="keyword">self</span>.fan_id] &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">parse_response</span>(&amp;<span class="keyword">self</span>, raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;Rpm&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> raw.<span class="title function_ invoke__">len</span>() &lt; <span class="number">2</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">Err</span>(io::Error::<span class="title function_ invoke__">new</span>(io::ErrorKind::InvalidData, <span class="string">&quot;need 2 bytes&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(<span class="title function_ invoke__">Rpm</span>(<span class="type">u16</span>::<span class="title function_ invoke__">from_le_bytes</span>([raw[<span class="number">0</span>], raw[<span class="number">1</span>]]) <span class="keyword">as</span> <span class="type">f64</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">AdminToken</span> &#123;</span><br><span class="line">    _private: (),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">authenticate</span>(user: &amp;<span class="type">str</span>, pass: &amp;<span class="type">str</span>) <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;AdminToken, &amp;<span class="symbol">&#x27;static</span> <span class="type">str</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> user == <span class="string">&quot;admin&quot;</span> &amp;&amp; pass == <span class="string">&quot;secret&quot;</span> &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(AdminToken &#123; _private: () &#125;)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="title function_ invoke__">Err</span>(<span class="string">&quot;authentication failed&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Idle</span>;</span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Active</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Session</span>&lt;State&gt; &#123;</span><br><span class="line">    host: <span class="type">String</span>,</span><br><span class="line">    _state: PhantomData&lt;State&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Session</span>&lt;Idle&gt; &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">connect</span>(host: &amp;<span class="type">str</span>) <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">        Session &#123;</span><br><span class="line">            host: host.<span class="title function_ invoke__">to_string</span>(),</span><br><span class="line">            _state: PhantomData,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">activate</span>(<span class="keyword">self</span>, _admin: &amp;AdminToken) <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;Session&lt;Active&gt;, <span class="type">String</span>&gt; &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(Session &#123;</span><br><span class="line">            host: <span class="keyword">self</span>.host,</span><br><span class="line">            _state: PhantomData,</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Session</span>&lt;Active&gt; &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">execute</span>&lt;C: IpmiCmd&gt;(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, cmd: &amp;C) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;C::Response&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">raw</span> = <span class="keyword">self</span>.<span class="title function_ invoke__">raw_send</span>(cmd.<span class="title function_ invoke__">net_fn</span>(), cmd.<span class="title function_ invoke__">cmd_byte</span>(), &amp;cmd.<span class="title function_ invoke__">payload</span>())?;</span><br><span class="line">        cmd.<span class="title function_ invoke__">parse_response</span>(&amp;raw)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">raw_send</span>(&amp;<span class="keyword">self</span>, _nf: <span class="type">u8</span>, _cmd: <span class="type">u8</span>, _data: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> io::<span class="type">Result</span>&lt;<span class="type">Vec</span>&lt;<span class="type">u8</span>&gt;&gt; &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(<span class="built_in">vec!</span>[<span class="number">42</span>, <span class="number">0x1E</span>])</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">AuditToken</span> &#123;</span><br><span class="line">    run_id: <span class="type">u64</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">AuditToken</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">issue</span>(run_id: <span class="type">u64</span>) <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">        AuditToken &#123; run_id &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">log</span>(<span class="keyword">self</span>, message: &amp;<span class="type">str</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;[AUDIT run_id=&#123;&#125;] &#123;&#125;&quot;</span>, <span class="keyword">self</span>.run_id, message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">ValidFru</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> board_serial: <span class="type">String</span>,</span><br><span class="line">    <span class="keyword">pub</span> product_name: <span class="type">String</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">ValidFru</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">parse</span>(raw: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;<span class="keyword">Self</span>, &amp;<span class="symbol">&#x27;static</span> <span class="type">str</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> raw.<span class="title function_ invoke__">len</span>() &lt; <span class="number">8</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">Err</span>(<span class="string">&quot;FRU too short&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> raw[<span class="number">0</span>] != <span class="number">0x01</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_ invoke__">Err</span>(<span class="string">&quot;bad FRU version&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(ValidFru &#123;</span><br><span class="line">            board_serial: <span class="string">&quot;SN12345&quot;</span>.<span class="title function_ invoke__">to_string</span>(),</span><br><span class="line">            product_name: <span class="string">&quot;ServerX&quot;</span>.<span class="title function_ invoke__">to_string</span>(),</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Width16</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Reg</span>&lt;W&gt; &#123;</span><br><span class="line">    offset: <span class="type">u16</span>,</span><br><span class="line">    _w: PhantomData&lt;W&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Reg</span>&lt;Width16&gt; &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">read</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&gt;</span> <span class="type">u16</span> &#123;</span><br><span class="line">        <span class="number">0x8086</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">PcieDev</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> vendor_id: Reg&lt;Width16&gt;,</span><br><span class="line">    <span class="keyword">pub</span> device_id: Reg&lt;Width16&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">PcieDev</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">new</span>() <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">        PcieDev &#123;</span><br><span class="line">            vendor_id: Reg &#123; offset: <span class="number">0x00</span>, _w: PhantomData &#125;,</span><br><span class="line">            device_id: Reg &#123; offset: <span class="number">0x02</span>, _w: PhantomData &#125;,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">full_diagnostic</span>() <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;(), <span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">admin</span> = <span class="title function_ invoke__">authenticate</span>(<span class="string">&quot;admin&quot;</span>, <span class="string">&quot;secret&quot;</span>).<span class="title function_ invoke__">map_err</span>(|e| e.<span class="title function_ invoke__">to_string</span>())?;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">session</span> = Session::&lt;Idle&gt;::<span class="title function_ invoke__">connect</span>(<span class="string">&quot;192.168.1.100&quot;</span>);</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">session</span> = session.<span class="title function_ invoke__">activate</span>(&amp;admin)?;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">temp</span>: Celsius = session.<span class="title function_ invoke__">execute</span>(&amp;ReadTemp &#123; sensor_id: <span class="number">0</span> &#125;)</span><br><span class="line">        .<span class="title function_ invoke__">map_err</span>(|e| e.<span class="title function_ invoke__">to_string</span>())?;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">fan</span>: Rpm = session.<span class="title function_ invoke__">execute</span>(&amp;ReadFanSpeed &#123; fan_id: <span class="number">1</span> &#125;)</span><br><span class="line">        .<span class="title function_ invoke__">map_err</span>(|e| e.<span class="title function_ invoke__">to_string</span>())?;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">pcie</span> = PcieDev::<span class="title function_ invoke__">new</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">vendor_id</span> = pcie.vendor_id.<span class="title function_ invoke__">read</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">raw_fru</span> = <span class="built_in">vec!</span>[<span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0xFD</span>];</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">fru</span> = ValidFru::<span class="title function_ invoke__">parse</span>(&amp;raw_fru).<span class="title function_ invoke__">map_err</span>(|e| e.<span class="title function_ invoke__">to_string</span>())?;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">audit</span> = AuditToken::<span class="title function_ invoke__">issue</span>(<span class="number">1001</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">report</span> = <span class="built_in">format!</span>(</span><br><span class="line">        <span class="string">&quot;Server: &#123;&#125; (SN: &#123;&#125;), VID: 0x&#123;:04X&#125;, Temp: &#123;:?&#125;, Fan: &#123;:?&#125;&quot;</span>,</span><br><span class="line">        fru.product_name,</span><br><span class="line">        fru.board_serial,</span><br><span class="line">        vendor_id,</span><br><span class="line">        temp,</span><br><span class="line">        fan,</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    audit.<span class="title function_ invoke__">log</span>(&amp;report);</span><br><span class="line"></span><br><span class="line">    <span class="title function_ invoke__">Ok</span>(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码最有意思的地方，不是“它能跑”，而是它在<strong>编译期</strong>已经帮我们排除了很多非法情况。</p>
+<hr>
+<h2 id="9-编译器到底替我们证明了什么？"><a href="#9-编译器到底替我们证明了什么？" class="headerlink" title="9. 编译器到底替我们证明了什么？"></a>9. 编译器到底替我们证明了什么？</h2><p>把上面的设计拆开看，编译器至少能帮我们兜住这几类错误：</p>
+<table>
+<thead>
+<tr>
+<th>错误类型</th>
+<th>怎么被防住</th>
+<th>对应模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未认证就激活会话</td>
+<td><code>activate()</code> 必须拿 <code>&amp;AdminToken</code></td>
+<td>capability token</td>
+</tr>
+<tr>
+<td>会话状态不对就发命令</td>
+<td><code>execute()</code> 只存在于 <code>Session&lt;Active&gt;</code></td>
+<td>typestate</td>
+</tr>
+<tr>
+<td>命令返回值写错类型</td>
+<td><code>IpmiCmd::Response</code> 绑定响应类型</td>
+<td>typed command</td>
+</tr>
+<tr>
+<td>温度&#x2F;转速&#x2F;电压混用</td>
+<td><code>Celsius</code>、<code>Rpm</code>、<code>Volts</code> 是不同类型</td>
+<td>dimensional type</td>
+</tr>
+<tr>
+<td>寄存器宽度读错</td>
+<td><code>Reg&lt;Width16&gt;</code> 只能读出 <code>u16</code></td>
+<td>phantom type</td>
+</tr>
+<tr>
+<td>未校验原始数据直接使用</td>
+<td>先 <code>parse()</code> 才能得到 <code>ValidFru</code></td>
+<td>validated boundary</td>
+</tr>
+<tr>
+<td>审计 token 被复用</td>
+<td><code>log(self, ...)</code> 消费所有权</td>
+<td>single-use type</td>
+</tr>
+</tbody></table>
+<p>这也是这类设计最打动人的地方：</p>
+<p><strong>不是“多写了几层抽象”，而是把一堆原本只能靠测试和经验发现的问题，前移到了编译期。</strong></p>
+<hr>
+<h2 id="10-这类设计的成本和收益"><a href="#10-这类设计的成本和收益" class="headerlink" title="10. 这类设计的成本和收益"></a>10. 这类设计的成本和收益</h2><p>这种写法当然不是零成本的。<br>你需要多定义一些类型，多思考状态边界，也要接受一开始 API 看起来会比“直接传 <code>u8</code> 和 <code>Vec&lt;u8&gt;</code>”更啰嗦。</p>
+<p>但它带来的收益非常适合基础设施和协议类系统：</p>
+<ul>
+<li>API 更难被误用</li>
+<li>重构时更有信心</li>
+<li>单元测试压力下降</li>
+<li>文档和代码更一致</li>
+<li>很多 bug 根本进入不了运行时</li>
+</ul>
+<p>如果你的系统有这些特点，这种设计会特别值：</p>
+<ul>
+<li>协议有明确状态流转</li>
+<li>外部输入不可信</li>
+<li>数值单位很多</li>
+<li>权限控制严格</li>
+<li>某些资源只能单次使用</li>
+<li>错误代价很高</li>
+</ul>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>很多文章会把 Rust 的优势概括成“内存安全”。<br>但对于工程系统来说，更实用的一层是：</p>
+<blockquote>
+<p>Rust 可以让你把业务规则、协议约束、单位语义和权限边界，一起编码进类型系统。</p>
+</blockquote>
+</div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+          <div class="post-nav-prev">
+            <i class="fa fa-chevron-left"></i>
+            <a href="/2026/06/14/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="prev">
+              排序算法
+            </a>
+          </div>
+           
+          <div class="post-nav-next">
+            <a href="/2026/05/05/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BA%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" rel="next">
+              从零构建大语言模型
+            </a>
+            <i class="fa fa-chevron-right"></i>
+          </div>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <nav class="pagination">
+  
+  <div class="pagination-placeholder"></div>
+  
+</nav>
+
+</div>
+</div>
+    <footer class="footer-container">
+  <div class="footer-content">
+    <p class="footer-text">
+      © 2026
+      <a href="https://github.com/touyoutaaa" target="_blank">touyoutaaa</a>.
+      All Rights Reserved.
+    </p>
+  </div>
+</footer>
+
+
+    <div class="to-top">
+  <svg class="icon" aria-hidden="true">
+    <use xlink:href="#icon-arrowup"></use>
+  </svg>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toTop = document.querySelector('.to-top');
+    if (!toTop) return;
+
+    const hasGsap = typeof gsap !== 'undefined';
+
+    if (hasGsap) {
+      // 初始隐藏状态
+      gsap.set(toTop, { opacity: 0, scale: 0.6, display: 'none' });
+      
+      let isVisible = false;
+
+      window.addEventListener('scroll', function () {
+        const shouldShow = window.scrollY > window.innerHeight;
+        
+        if (shouldShow && !isVisible) {
+          isVisible = true;
+          gsap.killTweensOf(toTop);
+          gsap.set(toTop, { display: 'flex' });
+          gsap.to(toTop, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(1.7)'
+          });
+        } else if (!shouldShow && isVisible) {
+          isVisible = false;
+          gsap.killTweensOf(toTop);
+          gsap.to(toTop, {
+            opacity: 0,
+            scale: 0.6,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+              if (!isVisible) gsap.set(toTop, { display: 'none' });
+            }
+          });
+        }
+      });
+
+      // Hover 交互与磁性效果在 animation.js 中全局托管
+    } else {
+      // 优雅降级：传统滚动监听
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > window.innerHeight) {
+          toTop.style.display = 'flex';
+        } else {
+          toTop.style.display = 'none';
+        }
+      });
+    }
+
+    // 点击事件
+    toTop.addEventListener('click', function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
+  });
+</script>
+
+    
+<script src="/js/animation.js"></script>
+<script src="/js/highlight.js"></script>
+<script src="/js/image-viewer.js"></script>
+<script src="/js/home-hero.js"></script>
+
+  </body>
+</html>
