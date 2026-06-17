@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 字体 (霞鹜文楷 LXGW WenKai Webfont) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.min.css" />
+  <!-- favicon -->
+  <link rel="shortcut icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <!-- activeTitle -->
+  
+  <!-- inactiveTitle -->
+  
+
+  <title>[算法]二分查找</title>
+  <!-- 注入配置到全局变量 -->
+  <script>
+    window.SITE_CONFIG = {
+      root: '/',
+      activeTitle: '[算法]二分查找',
+      inactiveTitle: 'touyoutaaa',
+      gsap: {"enable":true,"entrance_stagger":0.08,"scroll_trigger":true,"parallax":true,"hover_effect":true}
+    };
+  </script>
+
+  <!-- 引入 GSAP 核心库及 ScrollTrigger 插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- 加载JS文件 -->
+  
+<script src="/js/head.js"></script>
+<script src="/js/iconfont.js"></script>
+<script src="/js/header.js"></script>
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body class="">
+    <div id="swiper-container">
+  <img src="/images/swiper.png" alt="轮播图" />
+  <div class="shadow"></div>
+  <div class="hero-copy">
+    <p class="hero-kicker">HOME</p>
+    <h1 class="hero-title" data-typewriter="Love Life Love Coding Love You" aria-label="Love Life Love Coding Love You">
+    </h1>
+  </div>
+</div>
+    <div class="body-page-view"><div id="header-container" class="header-top">
+  <div class="logo">
+    <a href="/">
+       云辇103 
+    </a>
+  </div>
+
+  <button class="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
+    <span class="line line-1"></span>
+    <span class="line line-2"></span>
+    <span class="line line-3"></span>
+  </button>
+
+  <nav class="nav-menu">
+    <ul class="nav-list">
+       
+      <li>
+        <a href="/">首页</a>
+      </li>
+      
+      <li>
+        <a href="/posts">文章</a>
+      </li>
+      
+      <li>
+        <a href="/projects">项目</a>
+      </li>
+      
+      <li>
+        <a href="/stats">统计</a>
+      </li>
+      
+      <li>
+        <a href="/about">关于</a>
+      </li>
+       
+    </ul>
+  </nav>
+</div>
+
+<div class="post-page">
+  <main class="post-container">
+    <article class="post-article">
+      <header class="post-header">
+        <h1 class="post-title">[算法]二分查找</h1>
+        <div class="post-meta">
+          
+          <div class="meta-item">
+            <p class="post-time">2026-06-17 00:00</p>
+          </div>
+           
+          <p class="meta-item">
+            <a class="post-tag-none-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a>
+          </p>
+          
+        </div>
+      </header>
+
+      <div class="post-content"><h2 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h2><ul>
+<li>题目给出的数组或答案空间具有 <code>单调性</code></li>
+<li>需要在 <code>有序数组</code> 中快速定位目标值</li>
+<li>需要求 <code>第一个满足条件</code> 或 <code>最后一个满足条件</code> 的位置</li>
+<li>有些题不是直接查数组，而是对 <code>答案</code> 进行二分</li>
+</ul>
+<h2 id="核心思路"><a href="#核心思路" class="headerlink" title="核心思路"></a>核心思路</h2><ul>
+<li>维护一个搜索区间，通常是 <code>[left, right]</code></li>
+<li>每次取中点 <code>mid = left + (right - left) / 2</code></li>
+<li>根据 <code>mid</code> 是否满足条件，决定丢弃左半边还是右半边</li>
+<li>不断缩小区间，直到找到答案或区间为空</li>
+</ul>
+<p>Rust 模板</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">binary_search</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;, target: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0i32</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">right</span> = nums.<span class="title function_ invoke__">len</span>() <span class="keyword">as</span> <span class="type">i32</span> - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> left &lt;= right &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">mid</span> = left + (right - left) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">value</span> = nums[mid <span class="keyword">as</span> <span class="type">usize</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> value == target &#123;</span><br><span class="line">            <span class="keyword">return</span> mid;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> value &lt; target &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid - <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    -<span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找左边界"><a href="#查找左边界" class="headerlink" title="查找左边界"></a>查找左边界</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">lower_bound</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;, target: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">usize</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">right</span> = nums.<span class="title function_ invoke__">len</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> left &lt; right &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">mid</span> = left + (right - left) / <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> nums[mid] &lt; target &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代表题"><a href="#代表题" class="headerlink" title="代表题"></a>代表题</h2><ul>
+<li><code>704. 二分查找</code><br>题意：给定一个升序整数数组和一个目标值 <code>target</code>，若目标值存在则返回下标，否则返回 <code>-1</code>。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">search</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;, target: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0i32</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">right</span> = nums.<span class="title function_ invoke__">len</span>() <span class="keyword">as</span> <span class="type">i32</span> - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> left &lt;= right &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">mid</span> = left + (right - left) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">value</span> = nums[mid <span class="keyword">as</span> <span class="type">usize</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> value == target &#123;</span><br><span class="line">            <span class="keyword">return</span> mid;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> value &lt; target &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid - <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    -<span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>35. 搜索插入位置</code><br>题意：给定一个升序数组和目标值 <code>target</code>，找到目标值所在位置；如果不存在，返回它按顺序应插入的位置。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">search_insert</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;, target: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">right</span> = nums.<span class="title function_ invoke__">len</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> left &lt; right &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">mid</span> = left + (right - left) / <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> nums[mid] &lt; target &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left <span class="keyword">as</span> <span class="type">i32</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>34. 在排序数组中查找元素的第一个和最后一个位置</code><br>题意：给定一个按非递减顺序排列的数组，找出目标值 <code>target</code> 的起始位置和结束位置；如果不存在则返回 <code>[-1, -1]</code>。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">lower_bound</span>(nums: &amp;[<span class="type">i32</span>], target: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">usize</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">right</span> = nums.<span class="title function_ invoke__">len</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> left &lt; right &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">mid</span> = left + (right - left) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> nums[mid] &lt; target &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">search_range</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;, target: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">left</span> = <span class="title function_ invoke__">lower_bound</span>(&amp;nums, target);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> left == nums.<span class="title function_ invoke__">len</span>() || nums[left] != target &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">vec!</span>[-<span class="number">1</span>, -<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">right</span> = <span class="title function_ invoke__">lower_bound</span>(&amp;nums, target + <span class="number">1</span>) - <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">vec!</span>[left <span class="keyword">as</span> <span class="type">i32</span>, right <span class="keyword">as</span> <span class="type">i32</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>153. 寻找旋转排序数组中的最小值</code><br>题意：给定一个原本升序、经过若干次旋转的数组，数组中元素互不相同，找出其中的最小值。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">find_min</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">right</span> = nums.<span class="title function_ invoke__">len</span>() - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> left &lt; right &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">mid</span> = left + (right - left) / <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> nums[mid] &gt; nums[right] &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    nums[left]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>875. 爱吃香蕉的珂珂</code><br>题意：给定若干堆香蕉和总时长 <code>h</code>，求珂珂在 <code>h</code> 小时内吃完所有香蕉的最小速度。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">min_eating_speed</span>(piles: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;, h: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">right</span> = *piles.<span class="title function_ invoke__">iter</span>().<span class="title function_ invoke__">max</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> left &lt; right &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">mid</span> = left + (right - left) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">hours</span> = <span class="number">0i64</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> &amp;pile <span class="keyword">in</span> &amp;piles &#123;</span><br><span class="line">            hours += ((pile <span class="keyword">as</span> <span class="type">i64</span>) + (mid <span class="keyword">as</span> <span class="type">i64</span>) - <span class="number">1</span>) / mid <span class="keyword">as</span> <span class="type">i64</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> hours &lt;= h <span class="keyword">as</span> <span class="type">i64</span> &#123;</span><br><span class="line">            right = mid;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+          <div class="post-nav-prev"></div>
+           
+          <div class="post-nav-next">
+            <a href="/2026/06/17/%E7%AE%97%E6%B3%95-%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/" rel="next">
+              [算法]滑动窗口
+            </a>
+            <i class="fa fa-chevron-right"></i>
+          </div>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <nav class="pagination">
+  
+  <div class="pagination-placeholder"></div>
+  
+</nav>
+
+</div>
+</div>
+    <footer class="footer-container">
+  <div class="footer-content">
+    <p class="footer-text">
+      © 2026
+      <a href="https://github.com/touyoutaaa" target="_blank">touyoutaaa</a>.
+      All Rights Reserved.
+    </p>
+  </div>
+</footer>
+
+
+    <div class="to-top">
+  <svg class="icon" aria-hidden="true">
+    <use xlink:href="#icon-arrowup"></use>
+  </svg>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toTop = document.querySelector('.to-top');
+    if (!toTop) return;
+
+    const hasGsap = typeof gsap !== 'undefined';
+
+    if (hasGsap) {
+      // 初始隐藏状态
+      gsap.set(toTop, { opacity: 0, scale: 0.6, display: 'none' });
+      
+      let isVisible = false;
+
+      window.addEventListener('scroll', function () {
+        const shouldShow = window.scrollY > window.innerHeight;
+        
+        if (shouldShow && !isVisible) {
+          isVisible = true;
+          gsap.killTweensOf(toTop);
+          gsap.set(toTop, { display: 'flex' });
+          gsap.to(toTop, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(1.7)'
+          });
+        } else if (!shouldShow && isVisible) {
+          isVisible = false;
+          gsap.killTweensOf(toTop);
+          gsap.to(toTop, {
+            opacity: 0,
+            scale: 0.6,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+              if (!isVisible) gsap.set(toTop, { display: 'none' });
+            }
+          });
+        }
+      });
+
+      // Hover 交互与磁性效果在 animation.js 中全局托管
+    } else {
+      // 优雅降级：传统滚动监听
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > window.innerHeight) {
+          toTop.style.display = 'flex';
+        } else {
+          toTop.style.display = 'none';
+        }
+      });
+    }
+
+    // 点击事件
+    toTop.addEventListener('click', function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
+  });
+</script>
+
+    
+<script src="/js/animation.js"></script>
+<script src="/js/highlight.js"></script>
+<script src="/js/image-viewer.js"></script>
+<script src="/js/home-hero.js"></script>
+
+  </body>
+</html>

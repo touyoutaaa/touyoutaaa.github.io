@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 字体 (霞鹜文楷 LXGW WenKai Webfont) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.min.css" />
+  <!-- favicon -->
+  <link rel="shortcut icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <!-- activeTitle -->
+  
+  <!-- inactiveTitle -->
+  
+
+  <title>[算法]滑动窗口</title>
+  <!-- 注入配置到全局变量 -->
+  <script>
+    window.SITE_CONFIG = {
+      root: '/',
+      activeTitle: '[算法]滑动窗口',
+      inactiveTitle: 'touyoutaaa',
+      gsap: {"enable":true,"entrance_stagger":0.08,"scroll_trigger":true,"parallax":true,"hover_effect":true}
+    };
+  </script>
+
+  <!-- 引入 GSAP 核心库及 ScrollTrigger 插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- 加载JS文件 -->
+  
+<script src="/js/head.js"></script>
+<script src="/js/iconfont.js"></script>
+<script src="/js/header.js"></script>
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body class="">
+    <div id="swiper-container">
+  <img src="/images/swiper.png" alt="轮播图" />
+  <div class="shadow"></div>
+  <div class="hero-copy">
+    <p class="hero-kicker">HOME</p>
+    <h1 class="hero-title" data-typewriter="Love Life Love Coding Love You" aria-label="Love Life Love Coding Love You">
+    </h1>
+  </div>
+</div>
+    <div class="body-page-view"><div id="header-container" class="header-top">
+  <div class="logo">
+    <a href="/">
+       云辇103 
+    </a>
+  </div>
+
+  <button class="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
+    <span class="line line-1"></span>
+    <span class="line line-2"></span>
+    <span class="line line-3"></span>
+  </button>
+
+  <nav class="nav-menu">
+    <ul class="nav-list">
+       
+      <li>
+        <a href="/">首页</a>
+      </li>
+      
+      <li>
+        <a href="/posts">文章</a>
+      </li>
+      
+      <li>
+        <a href="/projects">项目</a>
+      </li>
+      
+      <li>
+        <a href="/stats">统计</a>
+      </li>
+      
+      <li>
+        <a href="/about">关于</a>
+      </li>
+       
+    </ul>
+  </nav>
+</div>
+
+<div class="post-page">
+  <main class="post-container">
+    <article class="post-article">
+      <header class="post-header">
+        <h1 class="post-title">[算法]滑动窗口</h1>
+        <div class="post-meta">
+          
+          <div class="meta-item">
+            <p class="post-time">2026-06-17 00:00</p>
+          </div>
+           
+          <p class="meta-item">
+            <a class="post-tag-none-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a>
+          </p>
+          
+        </div>
+      </header>
+
+      <div class="post-content"><h2 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h2><ul>
+<li>题目要求 <code>连续子串</code> 或 <code>连续子数组</code></li>
+<li>需要求 <code>最长</code>、<code>最短</code></li>
+<li>窗口满足某个限制条件，比如不重复、和至少为某值、包含某些字符</li>
+</ul>
+<h2 id="核心思路"><a href="#核心思路" class="headerlink" title="核心思路"></a>核心思路</h2><ul>
+<li>用两个指针维护一个区间 <code>[left, right]</code></li>
+<li><code>right</code> 负责扩张窗口</li>
+<li>当窗口不满足条件时，不断移动 <code>left</code> 缩小窗口</li>
+<li>每次窗口合法时更新答案</li>
+</ul>
+<p>Rust 模板</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">window_template</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = <span class="number">0i32</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">right</span> <span class="keyword">in</span> <span class="number">0</span>..nums.<span class="title function_ invoke__">len</span>() &#123;</span><br><span class="line">        <span class="comment">// 1. 扩张窗口</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> <span class="literal">false</span> &#123;</span><br><span class="line">            <span class="comment">// 2. 缩小窗口直到重新合法</span></span><br><span class="line">            left += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 更新答案</span></span><br><span class="line">        ans = ans.<span class="title function_ invoke__">max</span>((right - left + <span class="number">1</span>) <span class="keyword">as</span> <span class="type">i32</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ans</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="无重复字符的最长子串"><a href="#无重复字符的最长子串" class="headerlink" title="无重复字符的最长子串"></a>无重复字符的最长子串</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">length_of_longest_substring</span>(s: <span class="type">String</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">count</span> = [<span class="number">0</span>; <span class="number">128</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (right, b) <span class="keyword">in</span> s.<span class="title function_ invoke__">bytes</span>().<span class="title function_ invoke__">enumerate</span>() &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">idx</span> = b <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">        count[idx] += <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> count[idx] &gt; <span class="number">1</span> &#123;</span><br><span class="line">            count[s.<span class="title function_ invoke__">as_bytes</span>()[left] <span class="keyword">as</span> <span class="type">usize</span>] -= <span class="number">1</span>;</span><br><span class="line">            left += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ans = ans.<span class="title function_ invoke__">max</span>(right - left + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ans <span class="keyword">as</span> <span class="type">i32</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代表题"><a href="#代表题" class="headerlink" title="代表题"></a>代表题</h2><ul>
+<li><code>3. 无重复字符的最长子串</code><br>题意：给定一个字符串，求其中不含重复字符的最长连续子串长度。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::collections::HashSet;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">length_of_longest_substring</span>(s: <span class="type">String</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s</span> = s.<span class="title function_ invoke__">as_bytes</span>();          <span class="comment">// 转为字节切片，便于索引</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = <span class="number">0i32</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">window</span> = HashSet::<span class="title function_ invoke__">new</span>(); <span class="comment">// 用于记录窗口内出现的字符</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">right</span> <span class="keyword">in</span> <span class="number">0</span>..s.<span class="title function_ invoke__">len</span>() &#123;</span><br><span class="line">        <span class="comment">// 1. 扩张窗口：将 s[right] 加入窗口</span></span><br><span class="line">        <span class="comment">// 2. 如果 s[right] 已存在，则收缩窗口直到重复字符被移除</span></span><br><span class="line">        <span class="keyword">while</span> window.<span class="title function_ invoke__">contains</span>(&amp;s[right]) &#123;</span><br><span class="line">            window.<span class="title function_ invoke__">remove</span>(&amp;s[left]); <span class="comment">// 移除左指针指向的字符</span></span><br><span class="line">            left += <span class="number">1</span>;               <span class="comment">// 左指针右移</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 此时窗口内没有重复字符，将 s[right] 正式加入</span></span><br><span class="line">        window.<span class="title function_ invoke__">insert</span>(s[right]);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 更新答案（当前窗口长度为 right - left + 1）</span></span><br><span class="line">        ans = ans.<span class="title function_ invoke__">max</span>((right - left + <span class="number">1</span>) <span class="keyword">as</span> <span class="type">i32</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    ans</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>438. 找到字符串中所有字母异位词</code><br>题意：给定字符串 <code>s</code> 和 <code>p</code>，找出 <code>s</code> 中所有与 <code>p</code> 互为字母异位词的子串起始下标。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">find_anagrams</span>(s: <span class="type">String</span>, p: <span class="type">String</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s</span> = s.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">p</span> = p.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">p_len</span> = p.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 如果 s 比 p 短，不可能有异位词</span></span><br><span class="line">    <span class="keyword">if</span> s.<span class="title function_ invoke__">len</span>() &lt; p_len &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">vec!</span>[];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = <span class="type">Vec</span>::<span class="title function_ invoke__">new</span>();          <span class="comment">// 改为存储索引的 Vec</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 因为题目限定为小写字母，用长度为 26 的数组作为计数器</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">target</span> = [<span class="number">0i32</span>; <span class="number">26</span>];</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">window</span> = [<span class="number">0i32</span>; <span class="number">26</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 统计 p 中每个字符的出现次数</span></span><br><span class="line">    <span class="keyword">for</span> &amp;b <span class="keyword">in</span> p &#123;</span><br><span class="line">        target[(b - <span class="string">b&#x27;a&#x27;</span>) <span class="keyword">as</span> <span class="type">usize</span>] += <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">right</span> <span class="keyword">in</span> <span class="number">0</span>..s.<span class="title function_ invoke__">len</span>() &#123;</span><br><span class="line">        <span class="comment">// 1. 扩张窗口：将 s[right] 加入窗口</span></span><br><span class="line">        window[(s[right] - <span class="string">b&#x27;a&#x27;</span>) <span class="keyword">as</span> <span class="type">usize</span>] += <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 缩小窗口：直到窗口长度 == p_len（固定窗口特性）</span></span><br><span class="line">        <span class="keyword">while</span> (right - left + <span class="number">1</span>) &gt; p_len &#123;</span><br><span class="line">            window[(s[left] - <span class="string">b&#x27;a&#x27;</span>) <span class="keyword">as</span> <span class="type">usize</span>] -= <span class="number">1</span>;</span><br><span class="line">            left += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 更新答案：当窗口长度刚好等于 p_len，且字符频率完全匹配</span></span><br><span class="line">        <span class="keyword">if</span> (right - left + <span class="number">1</span>) == p_len &amp;&amp; window == target &#123;</span><br><span class="line">            ans.<span class="title function_ invoke__">push</span>(left <span class="keyword">as</span> <span class="type">i32</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ans</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>76. 最小覆盖子串</code><br>题意：给定字符串 <code>s</code> 和 <code>t</code>，在 <code>s</code> 中找到一个最短的连续子串，使它包含 <code>t</code> 中所有字符及其出现次数。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::collections::VecDeque;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">max_sliding_window</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;, k: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">k</span> = k <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = <span class="type">Vec</span>::<span class="title function_ invoke__">new</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">deque</span>: VecDeque&lt;<span class="type">usize</span>&gt; = VecDeque::<span class="title function_ invoke__">new</span>(); <span class="comment">// 存储索引，队首为当前窗口最大值索引</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">right</span> <span class="keyword">in</span> <span class="number">0</span>..nums.<span class="title function_ invoke__">len</span>() &#123;</span><br><span class="line">        <span class="comment">// 1. 扩张窗口：将新元素下标加入单调队列（维护递减）</span></span><br><span class="line">        <span class="keyword">while</span> !deque.<span class="title function_ invoke__">is_empty</span>() &amp;&amp; nums[*deque.<span class="title function_ invoke__">back</span>().<span class="title function_ invoke__">unwrap</span>()] &lt;= nums[right] &#123;</span><br><span class="line">            deque.<span class="title function_ invoke__">pop_back</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        deque.<span class="title function_ invoke__">push_back</span>(right);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 收缩窗口：如果窗口大小超过 k，左移 left（同时移除队列中不在窗口内的索引）</span></span><br><span class="line">        <span class="keyword">while</span> (right - left + <span class="number">1</span>) &gt; k &#123;</span><br><span class="line">            <span class="comment">// 如果队首就是 left，则弹出</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">let</span> <span class="variable">Some</span>(&amp;front) = deque.<span class="title function_ invoke__">front</span>() &#123;</span><br><span class="line">                <span class="keyword">if</span> front == left &#123;</span><br><span class="line">                    deque.<span class="title function_ invoke__">pop_front</span>();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            left += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 更新答案：当窗口长度 == k 时，记录队首元素（当前窗口最大值）</span></span><br><span class="line">        <span class="keyword">if</span> (right - left + <span class="number">1</span>) == k &#123;</span><br><span class="line">            ans.<span class="title function_ invoke__">push</span>(nums[*deque.<span class="title function_ invoke__">front</span>().<span class="title function_ invoke__">unwrap</span>()]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ans</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>209. 长度最小的子数组</code><br>题意：给定一个正整数数组和一个目标值 <code>target</code>，找出和大于等于 <code>target</code> 的最短连续子数组长度；如果不存在则返回 <code>0</code>。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::collections::HashMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">min_window</span>(s: <span class="type">String</span>, t: <span class="type">String</span>) <span class="punctuation">-&gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s</span> = s.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">t</span> = t.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">need</span> = HashMap::<span class="title function_ invoke__">new</span>();</span><br><span class="line">    <span class="keyword">for</span> &amp;b <span class="keyword">in</span> t &#123;</span><br><span class="line">        *need.<span class="title function_ invoke__">entry</span>(b).<span class="title function_ invoke__">or_insert</span>(<span class="number">0</span>) += <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">window</span> = HashMap::<span class="title function_ invoke__">new</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">left</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">valid</span> = <span class="number">0</span>;          <span class="comment">// 已满足的字符种类数</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">min_len</span> = <span class="type">usize</span>::MAX;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">start</span> = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">right</span> <span class="keyword">in</span> <span class="number">0</span>..s.<span class="title function_ invoke__">len</span>() &#123;</span><br><span class="line">        <span class="comment">// 1. 扩张窗口：将 s[right] 加入窗口</span></span><br><span class="line">        <span class="keyword">let</span> <span class="variable">c</span> = s[right];</span><br><span class="line">        *window.<span class="title function_ invoke__">entry</span>(c).<span class="title function_ invoke__">or_insert</span>(<span class="number">0</span>) += <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> need.<span class="title function_ invoke__">contains_key</span>(&amp;c) &amp;&amp; window[&amp;c] == need[&amp;c] &#123;</span><br><span class="line">            valid += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 收缩窗口：当窗口完全覆盖 t 时，尝试左移缩小</span></span><br><span class="line">        <span class="keyword">while</span> valid == need.<span class="title function_ invoke__">len</span>() &#123;</span><br><span class="line">            <span class="comment">// 3. 更新答案（在收缩过程中记录最小窗口）</span></span><br><span class="line">            <span class="keyword">let</span> <span class="variable">cur_len</span> = right - left + <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> cur_len &lt; min_len &#123;</span><br><span class="line">                min_len = cur_len;</span><br><span class="line">                start = left;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 将要移出窗口的字符是 s[left]</span></span><br><span class="line">            <span class="keyword">let</span> <span class="variable">d</span> = s[left];</span><br><span class="line">            <span class="keyword">if</span> need.<span class="title function_ invoke__">contains_key</span>(&amp;d) &amp;&amp; window[&amp;d] == need[&amp;d] &#123;</span><br><span class="line">                valid -= <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            *window.<span class="title function_ invoke__">get_mut</span>(&amp;d).<span class="title function_ invoke__">unwrap</span>() -= <span class="number">1</span>;</span><br><span class="line">            left += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 注意：收缩条件为 `while valid == need.len()`，当收缩后不再满足覆盖时，循环结束，继续扩张 right</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> min_len == <span class="type">usize</span>::MAX &#123;</span><br><span class="line">        <span class="string">&quot;&quot;</span>.<span class="title function_ invoke__">to_string</span>()</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="type">String</span>::<span class="title function_ invoke__">from_utf8</span>(s[start..start + min_len].<span class="title function_ invoke__">to_vec</span>()).<span class="title function_ invoke__">unwrap</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+          <div class="post-nav-prev">
+            <i class="fa fa-chevron-left"></i>
+            <a href="/2026/06/17/%E7%AE%97%E6%B3%95-%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/" rel="prev">
+              [算法]二分查找
+            </a>
+          </div>
+           
+          <div class="post-nav-next">
+            <a href="/2026/06/14/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="next">
+              排序算法
+            </a>
+            <i class="fa fa-chevron-right"></i>
+          </div>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <nav class="pagination">
+  
+  <div class="pagination-placeholder"></div>
+  
+</nav>
+
+</div>
+</div>
+    <footer class="footer-container">
+  <div class="footer-content">
+    <p class="footer-text">
+      © 2026
+      <a href="https://github.com/touyoutaaa" target="_blank">touyoutaaa</a>.
+      All Rights Reserved.
+    </p>
+  </div>
+</footer>
+
+
+    <div class="to-top">
+  <svg class="icon" aria-hidden="true">
+    <use xlink:href="#icon-arrowup"></use>
+  </svg>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toTop = document.querySelector('.to-top');
+    if (!toTop) return;
+
+    const hasGsap = typeof gsap !== 'undefined';
+
+    if (hasGsap) {
+      // 初始隐藏状态
+      gsap.set(toTop, { opacity: 0, scale: 0.6, display: 'none' });
+      
+      let isVisible = false;
+
+      window.addEventListener('scroll', function () {
+        const shouldShow = window.scrollY > window.innerHeight;
+        
+        if (shouldShow && !isVisible) {
+          isVisible = true;
+          gsap.killTweensOf(toTop);
+          gsap.set(toTop, { display: 'flex' });
+          gsap.to(toTop, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(1.7)'
+          });
+        } else if (!shouldShow && isVisible) {
+          isVisible = false;
+          gsap.killTweensOf(toTop);
+          gsap.to(toTop, {
+            opacity: 0,
+            scale: 0.6,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+              if (!isVisible) gsap.set(toTop, { display: 'none' });
+            }
+          });
+        }
+      });
+
+      // Hover 交互与磁性效果在 animation.js 中全局托管
+    } else {
+      // 优雅降级：传统滚动监听
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > window.innerHeight) {
+          toTop.style.display = 'flex';
+        } else {
+          toTop.style.display = 'none';
+        }
+      });
+    }
+
+    // 点击事件
+    toTop.addEventListener('click', function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
+  });
+</script>
+
+    
+<script src="/js/animation.js"></script>
+<script src="/js/highlight.js"></script>
+<script src="/js/image-viewer.js"></script>
+<script src="/js/home-hero.js"></script>
+
+  </body>
+</html>
