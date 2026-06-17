@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
     loading: "图表加载中...",
     articlesList: "文章列表",
     articlesCount: "%s 篇",
+    projectsList: "项目列表",
+    projectsCount: "%s 个",
     noArticles: "无文章数据",
+    noProjects: "无项目数据",
     noChartData: "无关联图表数据",
     layoutError: "图表布局计算出错",
     flowPath: "关联流向路径",
@@ -24,17 +27,24 @@ document.addEventListener('DOMContentLoaded', function () {
     return i18n.articlesCount.replace('%s', count);
   }
 
+  function formatProjectsCount(count) {
+    return i18n.projectsCount.replace('%s', count);
+  }
+
   // ==========================================
   // 1. 初始化数据与页面元素
   // ==========================================
   const postsEl = document.getElementById('posts-data');
+  const projectsEl = document.getElementById('projects-data');
   const taxEl = document.getElementById('taxonomies-data');
-  if (!postsEl || !taxEl) return;
+  if (!postsEl || !projectsEl || !taxEl) return;
 
   let posts = [];
+  let projects = [];
   let taxData = { categories: {}, tags: {}, yearBase: '/archives/' };
   try {
     posts = JSON.parse(postsEl.textContent);
+    projects = JSON.parse(projectsEl.textContent);
     taxData = JSON.parse(taxEl.textContent);
   } catch (e) {
     console.error('Failed to parse serialization data:', e);
@@ -44,6 +54,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const chartContainer = document.getElementById('sankey-chart');
   const articlesListEl = document.getElementById('sankey-articles-list');
   const articlesCountEl = document.getElementById('sankey-articles-count');
+  const projectsListEl = document.getElementById('sankey-projects-list');
+  const projectsCountEl = document.getElementById('sankey-projects-count');
   const tabs = document.querySelectorAll('.sankey-tab');
 
   // 当前激活视图: 'all' | 'year-category' | 'category-tag'
@@ -55,13 +67,16 @@ document.addEventListener('DOMContentLoaded', function () {
   function updateViewVisibility() {
     const chartCard = document.getElementById('sankey-chart-card');
     const articlesSection = document.getElementById('sankey-articles-section');
+    const projectsSection = document.getElementById('sankey-projects-section');
 
     if (currentView === 'all') {
       if (chartCard) chartCard.style.display = 'none';
       if (articlesSection) articlesSection.style.display = 'block';
+      if (projectsSection) projectsSection.style.display = 'block';
     } else {
       if (chartCard) chartCard.style.display = 'block';
       if (articlesSection) articlesSection.style.display = 'none';
+      if (projectsSection) projectsSection.style.display = 'none';
     }
   }
 
@@ -127,6 +142,93 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       );
       
+      animItems.forEach(item => {
+        item.addEventListener('mouseenter', () => {
+          gsap.to(item, {
+            y: -4,
+            scale: 1.015,
+            borderColor: 'var(--secondary-text-color)',
+            boxShadow: '0 8px 20px var(--shadow-color1)',
+            duration: 0.25,
+            ease: 'power2.out'
+          });
+        });
+        item.addEventListener('mouseleave', () => {
+          gsap.to(item, {
+            y: 0,
+            scale: 1,
+            borderColor: 'var(--shadow-color1)',
+            boxShadow: '0 2px 8px var(--shadow-color2)',
+            duration: 0.25,
+            ease: 'power2.out'
+          });
+        });
+      });
+    }
+  }
+
+  function renderProjectsList() {
+    if (!projectsListEl) return;
+
+    if (projectsCountEl) {
+      projectsCountEl.textContent = formatProjectsCount(projects.length);
+    }
+
+    projectsListEl.innerHTML = '';
+
+    if (projects.length === 0) {
+      projectsListEl.innerHTML = `<div class="sankey-loader">${i18n.noProjects}</div>`;
+      return;
+    }
+
+    projects.forEach(project => {
+      const card = document.createElement('a');
+      card.href = project.path;
+      card.className = 'sankey-article-card sankey-project-card';
+
+      let tagsHtml = '';
+      if (project.tags && project.tags.length > 0) {
+        project.tags.slice(0, 3).forEach(tag => {
+          tagsHtml += `<span class="article-badge tag-badge">#${tag}</span>`;
+        });
+      }
+
+      const summaryHtml = project.summary
+        ? `<p class="project-card-summary">${project.summary}</p>`
+        : '';
+
+      card.innerHTML = `
+        <div class="article-card-header">
+          <div class="project-card-meta">
+            <span class="project-type-badge">Project</span>
+          </div>
+          <h4 class="article-card-title">${project.title}</h4>
+          ${summaryHtml}
+        </div>
+        <div class="article-card-footer">
+          <span class="article-date">
+            <i class="far fa-calendar-alt"></i> ${project.date || '-'}
+          </span>
+          <div class="article-taxonomies">${tagsHtml}</div>
+        </div>
+      `;
+      projectsListEl.appendChild(card);
+    });
+
+    if (typeof gsap !== 'undefined') {
+      const animItems = projectsListEl.querySelectorAll('.sankey-project-card');
+      gsap.fromTo(animItems,
+        { opacity: 0, y: 15 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.45,
+          stagger: 0.05,
+          ease: 'power2.out',
+          overwrite: 'auto'
+        }
+      );
+
       animItems.forEach(item => {
         item.addEventListener('mouseenter', () => {
           gsap.to(item, {
@@ -576,6 +678,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateViewVisibility();
         if (currentView === 'all') {
           renderArticlesList();
+          renderProjectsList();
         } else {
           renderSankey();
         }
@@ -598,4 +701,5 @@ document.addEventListener('DOMContentLoaded', function () {
   // 初次加载启动
   updateViewVisibility();
   renderArticlesList();
+  renderProjectsList();
 });
