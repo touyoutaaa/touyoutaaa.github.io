@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 字体 (霞鹜文楷 LXGW WenKai Webfont) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.min.css" />
+  <!-- favicon -->
+  <link rel="shortcut icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <!-- activeTitle -->
+  
+  <!-- inactiveTitle -->
+  
+
+  <title>[算法]动态规划</title>
+  <!-- 注入配置到全局变量 -->
+  <script>
+    window.SITE_CONFIG = {
+      root: '/',
+      activeTitle: '[算法]动态规划',
+      inactiveTitle: 'touyoutaaa',
+      gsap: {"enable":true,"entrance_stagger":0.08,"scroll_trigger":true,"parallax":true,"hover_effect":true}
+    };
+  </script>
+
+  <!-- 引入 GSAP 核心库及 ScrollTrigger 插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- 加载JS文件 -->
+  
+<script src="/js/head.js"></script>
+<script src="/js/iconfont.js"></script>
+<script src="/js/header.js"></script>
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body class="">
+    <div id="swiper-container">
+  <img src="/images/swiper.png" alt="轮播图" />
+  <div class="shadow"></div>
+  <div class="hero-copy">
+    <p class="hero-kicker">HOME</p>
+    <h1 class="hero-title" data-typewriter="Love Life Love Coding Love You" aria-label="Love Life Love Coding Love You">
+    </h1>
+  </div>
+</div>
+    <div class="body-page-view"><div id="header-container" class="header-top">
+  <div class="logo">
+    <a href="/">
+       云辇103 
+    </a>
+  </div>
+
+  <button class="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
+    <span class="line line-1"></span>
+    <span class="line line-2"></span>
+    <span class="line line-3"></span>
+  </button>
+
+  <nav class="nav-menu">
+    <ul class="nav-list">
+       
+      <li>
+        <a href="/">首页</a>
+      </li>
+      
+      <li>
+        <a href="/posts">文章</a>
+      </li>
+      
+      <li>
+        <a href="/projects">项目</a>
+      </li>
+      
+      <li>
+        <a href="/stats">统计</a>
+      </li>
+      
+      <li>
+        <a href="/about">关于</a>
+      </li>
+       
+    </ul>
+  </nav>
+</div>
+
+<div class="post-page">
+  <main class="post-container">
+    <article class="post-article">
+      <header class="post-header">
+        <h1 class="post-title">[算法]动态规划</h1>
+        <div class="post-meta">
+          
+          <div class="meta-item">
+            <p class="post-time">2026-06-21 00:00</p>
+          </div>
+           
+          <p class="meta-item">
+            <a class="post-tag-none-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a>
+          </p>
+          
+        </div>
+      </header>
+
+      <div class="post-content"><h2 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h2><ul>
+<li>问题可以拆成若干 <code>子问题</code></li>
+<li>当前状态的答案可以由 <code>更小规模的状态</code> 推出来</li>
+<li>子问题会被 <code>重复计算</code></li>
+<li>题目要求 <code>最值</code>、<code>方案数</code>、<code>是否可行</code>，通常都可能是动态规划</li>
+</ul>
+<h2 id="核心思路"><a href="#核心思路" class="headerlink" title="核心思路"></a>核心思路</h2><ul>
+<li>先定义 <code>dp[i]</code> 或 <code>dp[i][j]</code> 的含义</li>
+<li>找出状态之间的 <code>转移方程</code></li>
+<li>明确 <code>初始状态</code></li>
+<li>按照正确顺序填表或记忆化搜索，最终得到答案</li>
+</ul>
+<p>Rust 模板</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">dp_template</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = nums.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="number">0i32</span>; n];</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>] = nums[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..n &#123;</span><br><span class="line">        <span class="comment">// 1. 状态转移</span></span><br><span class="line">        dp[i] = dp[i - <span class="number">1</span>].<span class="title function_ invoke__">max</span>(nums[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 返回答案</span></span><br><span class="line">    dp[n - <span class="number">1</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="爬楼梯"><a href="#爬楼梯" class="headerlink" title="爬楼梯"></a>爬楼梯</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">climb_stairs</span>(n: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = n <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="keyword">if</span> n &lt;= <span class="number">2</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> n <span class="keyword">as</span> <span class="type">i32</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="number">0i32</span>; n + <span class="number">1</span>];</span><br><span class="line">    dp[<span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">    dp[<span class="number">2</span>] = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">3</span>..=n &#123;</span><br><span class="line">        dp[i] = dp[i - <span class="number">1</span>] + dp[i - <span class="number">2</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[n]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代表题"><a href="#代表题" class="headerlink" title="代表题"></a>代表题</h2><ul>
+<li><code>5. 最长回文子串</code><br>题意：给定一个字符串，找出其中最长的回文子串。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">longest_palindrome</span>(s: <span class="type">String</span>) <span class="punctuation">-&gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">bytes</span> = s.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = bytes.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="built_in">vec!</span>[<span class="literal">false</span>; n]; n];</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">start</span> = <span class="number">0usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">max_len</span> = <span class="number">1usize</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> (<span class="number">0</span>..n).<span class="title function_ invoke__">rev</span>() &#123;</span><br><span class="line">        <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> i..n &#123;</span><br><span class="line">            <span class="keyword">if</span> bytes[i] == bytes[j] &amp;&amp; (j - i &lt;= <span class="number">2</span> || dp[i + <span class="number">1</span>][j - <span class="number">1</span>]) &#123;</span><br><span class="line">                dp[i][j] = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">if</span> j - i + <span class="number">1</span> &gt; max_len &#123;</span><br><span class="line">                    start = i;</span><br><span class="line">                    max_len = j - i + <span class="number">1</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    s[start..start + max_len].<span class="title function_ invoke__">to_string</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>32. 最长有效括号</code><br>题意：给定一个只包含左右括号的字符串，求最长合法括号子串的长度。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">longest_valid_parentheses</span>(s: <span class="type">String</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">bytes</span> = s.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = bytes.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="number">0usize</span>; n];</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = <span class="number">0usize</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..n &#123;</span><br><span class="line">        <span class="keyword">if</span> bytes[i] == <span class="string">b&#x27;)&#x27;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> bytes[i - <span class="number">1</span>] == <span class="string">b&#x27;(&#x27;</span> &#123;</span><br><span class="line">                dp[i] = <span class="keyword">if</span> i &gt;= <span class="number">2</span> &#123; dp[i - <span class="number">2</span>] &#125; <span class="keyword">else</span> &#123; <span class="number">0</span> &#125; + <span class="number">2</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> dp[i - <span class="number">1</span>] &lt; i &amp;&amp; bytes[i - dp[i - <span class="number">1</span>] - <span class="number">1</span>] == <span class="string">b&#x27;(&#x27;</span> &#123;</span><br><span class="line">                dp[i] = dp[i - <span class="number">1</span>] + <span class="number">2</span>;</span><br><span class="line">                <span class="keyword">if</span> i &gt;= dp[i - <span class="number">1</span>] + <span class="number">2</span> &#123;</span><br><span class="line">                    dp[i] += dp[i - dp[i - <span class="number">1</span>] - <span class="number">2</span>];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            ans = ans.<span class="title function_ invoke__">max</span>(dp[i]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ans <span class="keyword">as</span> <span class="type">i32</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>62. 不同路径</code><br>题意：机器人从左上角走到右下角，每次只能向右或向下，求不同路径总数。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">unique_paths</span>(m: <span class="type">i32</span>, n: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">m</span> = m <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = n <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="built_in">vec!</span>[<span class="number">1i32</span>; n]; m];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..m &#123;</span><br><span class="line">        <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">1</span>..n &#123;</span><br><span class="line">            dp[i][j] = dp[i - <span class="number">1</span>][j] + dp[i][j - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[m - <span class="number">1</span>][n - <span class="number">1</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>64. 最小路径和</code><br>题意：给定一个非负整数网格，从左上角走到右下角，每次只能向右或向下，求路径数字总和的最小值。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">min_path_sum</span>(grid: <span class="type">Vec</span>&lt;<span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;&gt;) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">m</span> = grid.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = grid[<span class="number">0</span>].<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="built_in">vec!</span>[<span class="number">0i32</span>; n]; m];</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>] = grid[<span class="number">0</span>][<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..m &#123;</span><br><span class="line">        dp[i][<span class="number">0</span>] = dp[i - <span class="number">1</span>][<span class="number">0</span>] + grid[i][<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">1</span>..n &#123;</span><br><span class="line">        dp[<span class="number">0</span>][j] = dp[<span class="number">0</span>][j - <span class="number">1</span>] + grid[<span class="number">0</span>][j];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..m &#123;</span><br><span class="line">        <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">1</span>..n &#123;</span><br><span class="line">            dp[i][j] = dp[i - <span class="number">1</span>][j].<span class="title function_ invoke__">min</span>(dp[i][j - <span class="number">1</span>]) + grid[i][j];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[m - <span class="number">1</span>][n - <span class="number">1</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>70. 爬楼梯</code><br>题意：每次可以爬 <code>1</code> 或 <code>2</code> 阶楼梯，给定楼梯总阶数 <code>n</code>，求有多少种不同爬法。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">climb_stairs</span>(n: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = n <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="keyword">if</span> n &lt;= <span class="number">2</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> n <span class="keyword">as</span> <span class="type">i32</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="number">0i32</span>; n + <span class="number">1</span>];</span><br><span class="line">    dp[<span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">    dp[<span class="number">2</span>] = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">3</span>..=n &#123;</span><br><span class="line">        dp[i] = dp[i - <span class="number">1</span>] + dp[i - <span class="number">2</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[n]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>72. 编辑距离</code><br>题意：给定两个单词，求将一个单词转换成另一个单词所需的最少操作数，操作包括插入、删除、替换。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">min_distance</span>(word1: <span class="type">String</span>, word2: <span class="type">String</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s1</span> = word1.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s2</span> = word2.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">m</span> = s1.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = s2.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="built_in">vec!</span>[<span class="number">0i32</span>; n + <span class="number">1</span>]; m + <span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">0</span>..=m &#123;</span><br><span class="line">        dp[i][<span class="number">0</span>] = i <span class="keyword">as</span> <span class="type">i32</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">0</span>..=n &#123;</span><br><span class="line">        dp[<span class="number">0</span>][j] = j <span class="keyword">as</span> <span class="type">i32</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..=m &#123;</span><br><span class="line">        <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">1</span>..=n &#123;</span><br><span class="line">            <span class="keyword">if</span> s1[i - <span class="number">1</span>] == s2[j - <span class="number">1</span>] &#123;</span><br><span class="line">                dp[i][j] = dp[i - <span class="number">1</span>][j - <span class="number">1</span>];</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                dp[i][j] = <span class="number">1</span> + dp[i - <span class="number">1</span>][j - <span class="number">1</span>].<span class="title function_ invoke__">min</span>(dp[i - <span class="number">1</span>][j].<span class="title function_ invoke__">min</span>(dp[i][j - <span class="number">1</span>]));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[m][n]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>118. 杨辉三角</code><br>题意：给定一个非负整数 <code>numRows</code>，生成杨辉三角的前 <code>numRows</code> 行。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">generate</span>(num_rows: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">num_rows</span> = num_rows <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = <span class="type">Vec</span>::<span class="title function_ invoke__">with_capacity</span>(num_rows);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">0</span>..num_rows &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">row</span> = <span class="built_in">vec!</span>[<span class="number">1</span>; i + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">1</span>..i &#123;</span><br><span class="line">            row[j] = ans[i - <span class="number">1</span>][j - <span class="number">1</span>] + ans[i - <span class="number">1</span>][j];</span><br><span class="line">        &#125;</span><br><span class="line">        ans.<span class="title function_ invoke__">push</span>(row);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ans</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>139. 单词拆分</code><br>题意：给定一个字符串和一个字典，判断该字符串能否被拆分成若干个字典中的单词。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::collections::HashSet;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">word_break</span>(s: <span class="type">String</span>, word_dict: <span class="type">Vec</span>&lt;<span class="type">String</span>&gt;) <span class="punctuation">-&gt;</span> <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = s.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">words</span>: HashSet&lt;<span class="type">String</span>&gt; = word_dict.<span class="title function_ invoke__">into_iter</span>().<span class="title function_ invoke__">collect</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="literal">false</span>; n + <span class="number">1</span>];</span><br><span class="line">    dp[<span class="number">0</span>] = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..=n &#123;</span><br><span class="line">        <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">0</span>..i &#123;</span><br><span class="line">            <span class="keyword">if</span> dp[j] &amp;&amp; words.<span class="title function_ invoke__">contains</span>(&amp;s[j..i]) &#123;</span><br><span class="line">                dp[i] = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[n]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>152. 乘积最大子数组</code><br>题意：给定一个整数数组，求乘积最大的连续子数组。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">max_product</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">max_dp</span> = nums[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">min_dp</span> = nums[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = nums[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> &amp;num <span class="keyword">in</span> nums.<span class="title function_ invoke__">iter</span>().<span class="title function_ invoke__">skip</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">candidates</span> = [num, max_dp * num, min_dp * num];</span><br><span class="line">        max_dp = *candidates.<span class="title function_ invoke__">iter</span>().<span class="title function_ invoke__">max</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">        min_dp = *candidates.<span class="title function_ invoke__">iter</span>().<span class="title function_ invoke__">min</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">        ans = ans.<span class="title function_ invoke__">max</span>(max_dp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ans</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>198. 打家劫舍</code><br>题意：给定一个数组表示每间房屋的钱数，不能偷相邻的房屋，求能偷到的最大金额。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">rob</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = nums.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">if</span> n == <span class="number">1</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> nums[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="number">0i32</span>; n];</span><br><span class="line">    dp[<span class="number">0</span>] = nums[<span class="number">0</span>];</span><br><span class="line">    dp[<span class="number">1</span>] = nums[<span class="number">0</span>].<span class="title function_ invoke__">max</span>(nums[<span class="number">1</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">2</span>..n &#123;</span><br><span class="line">        dp[i] = dp[i - <span class="number">1</span>].<span class="title function_ invoke__">max</span>(dp[i - <span class="number">2</span>] + nums[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[n - <span class="number">1</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>279. 完全平方数</code><br>题意：给定一个整数 <code>n</code>，求和为 <code>n</code> 的完全平方数的最少数量。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">num_squares</span>(n: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = n <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="type">i32</span>::MAX; n + <span class="number">1</span>];</span><br><span class="line">    dp[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..=n &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">j</span> = <span class="number">1usize</span>;</span><br><span class="line">        <span class="keyword">while</span> j * j &lt;= i &#123;</span><br><span class="line">            dp[i] = dp[i].<span class="title function_ invoke__">min</span>(dp[i - j * j] + <span class="number">1</span>);</span><br><span class="line">            j += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[n]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>300. 最长递增子序列</code><br>题意：给定一个整数数组，找出其中严格递增子序列的最大长度，子序列不要求连续。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">length_of_lis</span>(nums: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = nums.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="number">1i32</span>; n];</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ans</span> = <span class="number">1i32</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">0</span>..n &#123;</span><br><span class="line">        <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">0</span>..i &#123;</span><br><span class="line">            <span class="keyword">if</span> nums[j] &lt; nums[i] &#123;</span><br><span class="line">                dp[i] = dp[i].<span class="title function_ invoke__">max</span>(dp[j] + <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ans = ans.<span class="title function_ invoke__">max</span>(dp[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ans</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>322. 零钱兑换</code><br>题意：给定若干种硬币面额和目标金额 <code>amount</code>，求凑出该金额所需的最少硬币数；如果无法凑出则返回 <code>-1</code>。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">coin_change</span>(coins: <span class="type">Vec</span>&lt;<span class="type">i32</span>&gt;, amount: <span class="type">i32</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">amount</span> = amount <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[amount <span class="keyword">as</span> <span class="type">i32</span> + <span class="number">1</span>; amount + <span class="number">1</span>];</span><br><span class="line">    dp[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..=amount &#123;</span><br><span class="line">        <span class="keyword">for</span> &amp;coin <span class="keyword">in</span> &amp;coins &#123;</span><br><span class="line">            <span class="keyword">let</span> <span class="variable">coin</span> = coin <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">            <span class="keyword">if</span> coin &lt;= i &#123;</span><br><span class="line">                dp[i] = dp[i].<span class="title function_ invoke__">min</span>(dp[i - coin] + <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> dp[amount] &gt; amount <span class="keyword">as</span> <span class="type">i32</span> &#123;</span><br><span class="line">        -<span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        dp[amount]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>1143. 最长公共子序列</code><br>题意：给定两个字符串，求它们的最长公共子序列长度，子序列中的字符顺序不能改变，但不要求连续。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">longest_common_subsequence</span>(text1: <span class="type">String</span>, text2: <span class="type">String</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s1</span> = text1.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s2</span> = text2.<span class="title function_ invoke__">as_bytes</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">m</span> = s1.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">n</span> = s2.<span class="title function_ invoke__">len</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">dp</span> = <span class="built_in">vec!</span>[<span class="built_in">vec!</span>[<span class="number">0i32</span>; n + <span class="number">1</span>]; m + <span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..=m &#123;</span><br><span class="line">        <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="number">1</span>..=n &#123;</span><br><span class="line">            <span class="keyword">if</span> s1[i - <span class="number">1</span>] == s2[j - <span class="number">1</span>] &#123;</span><br><span class="line">                dp[i][j] = dp[i - <span class="number">1</span>][j - <span class="number">1</span>] + <span class="number">1</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                dp[i][j] = dp[i - <span class="number">1</span>][j].<span class="title function_ invoke__">max</span>(dp[i][j - <span class="number">1</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[m][n]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+          <div class="post-nav-prev">
+            <i class="fa fa-chevron-left"></i>
+            <a href="/2026/06/28/%E4%BB%8E%E9%97%AE%E9%A2%98%E5%87%BA%E5%8F%91%E5%AD%A6Agent/" rel="prev">
+              从问题出发学Agent
+            </a>
+          </div>
+           
+          <div class="post-nav-next">
+            <a href="/2026/06/17/%E7%AE%97%E6%B3%95-%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/" rel="next">
+              [算法]滑动窗口
+            </a>
+            <i class="fa fa-chevron-right"></i>
+          </div>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <nav class="pagination">
+  
+  <div class="pagination-placeholder"></div>
+  
+</nav>
+
+</div>
+</div>
+    <footer class="footer-container">
+  <div class="footer-content">
+    <p class="footer-text">
+      © 2026
+      <a href="https://github.com/touyoutaaa" target="_blank">touyoutaaa</a>.
+      All Rights Reserved.
+    </p>
+  </div>
+</footer>
+
+
+    <div class="to-top">
+  <svg class="icon" aria-hidden="true">
+    <use xlink:href="#icon-arrowup"></use>
+  </svg>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toTop = document.querySelector('.to-top');
+    if (!toTop) return;
+
+    const hasGsap = typeof gsap !== 'undefined';
+
+    if (hasGsap) {
+      // 初始隐藏状态
+      gsap.set(toTop, { opacity: 0, scale: 0.6, display: 'none' });
+      
+      let isVisible = false;
+
+      window.addEventListener('scroll', function () {
+        const shouldShow = window.scrollY > window.innerHeight;
+        
+        if (shouldShow && !isVisible) {
+          isVisible = true;
+          gsap.killTweensOf(toTop);
+          gsap.set(toTop, { display: 'flex' });
+          gsap.to(toTop, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(1.7)'
+          });
+        } else if (!shouldShow && isVisible) {
+          isVisible = false;
+          gsap.killTweensOf(toTop);
+          gsap.to(toTop, {
+            opacity: 0,
+            scale: 0.6,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+              if (!isVisible) gsap.set(toTop, { display: 'none' });
+            }
+          });
+        }
+      });
+
+      // Hover 交互与磁性效果在 animation.js 中全局托管
+    } else {
+      // 优雅降级：传统滚动监听
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > window.innerHeight) {
+          toTop.style.display = 'flex';
+        } else {
+          toTop.style.display = 'none';
+        }
+      });
+    }
+
+    // 点击事件
+    toTop.addEventListener('click', function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
+  });
+</script>
+
+    
+<script src="/js/animation.js"></script>
+<script src="/js/highlight.js"></script>
+<script src="/js/image-viewer.js"></script>
+<script src="/js/home-hero.js"></script>
+
+  </body>
+</html>
