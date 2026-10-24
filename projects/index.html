@@ -1,284 +1,667 @@
-<!DOCTYPE html>
-<html>
-  <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- 字体 (霞鹜文楷 LXGW WenKai Webfont) -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.min.css" />
-  <!-- favicon -->
-  <link rel="shortcut icon" href="/images/favicon.ico">
-<link rel="stylesheet" href="/css/style.css">
-
-
-  <!-- activeTitle -->
-  
-  <!-- inactiveTitle -->
-  
-
-  <title>项目</title>
-  <!-- 注入配置到全局变量 -->
-  <script>
-    window.SITE_CONFIG = {
-      root: '/',
-      activeTitle: '项目',
-      inactiveTitle: 'touyoutaaa',
-      gsap: {"enable":true,"entrance_stagger":0.08,"scroll_trigger":true,"parallax":true,"hover_effect":true}
-    };
-  </script>
-
-  <!-- 引入 GSAP 核心库及 ScrollTrigger 插件 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <!-- 加载JS文件 -->
-  
-<script src="/js/head.js"></script>
-<script src="/js/iconfont.js"></script>
-<script src="/js/header.js"></script>
-
-<meta name="generator" content="Hexo 8.1.1"></head>
-
-  <body class="">
-    <div id="swiper-container">
-  <img src="/images/swiper.png" alt="轮播图" />
-  <div class="shadow"></div>
-  <div class="hero-copy">
-    <p class="hero-kicker">HOME</p>
-    <h1 class="hero-title" data-typewriter="Love Life Love Coding Love You" aria-label="Love Life Love Coding Love You">
-    </h1>
-  </div>
-</div>
-    <div class="body-page-view"><div id="header-container" class="header-top">
-  <div class="logo">
-    <a href="/">
-       云辇103 
-    </a>
-  </div>
-
-  <button class="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
-    <span class="line line-1"></span>
-    <span class="line line-2"></span>
-    <span class="line line-3"></span>
-  </button>
-
-  <nav class="nav-menu">
-    <ul class="nav-list">
-       
-      <li>
-        <a href="/">首页</a>
-      </li>
-      
-      <li>
-        <a href="/posts">文章</a>
-      </li>
-      
-      <li>
-        <a href="/projects">项目</a>
-      </li>
-      
-      <li>
-        <a href="/stats">统计</a>
-      </li>
-      
-      <li>
-        <a href="/about">关于</a>
-      </li>
-       
-    </ul>
-  </nav>
-</div>
-
-
-
-
-<div class="page-content projects-page">
-  <section class="projects-hero">
-    <div class="projects-hero-copy">
-      <span class="projects-kicker">Projects</span>
-      <h1 class="projects-title">这里会慢慢长成我的项目陈列室</h1>
-      <p class="projects-subtitle">
-        先放一版卡片风格 demo，后面你可以把每个真实项目的背景、技术选型、进展和链接都记录在这里。
-      </p>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>项目架构介绍 · Welcome / 加工监控与反控</title>
+<style>
+  :root { --bg: #101819; --surface: #172124; --line: #344346; --text: #e9f0ed; --muted: #a8b6b4; --accent: #80d5b6; --welcome: #80d5b6; --machining: #f1b67a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: Inter, "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif; }
+  button, select { font: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: default; opacity: .35; }
+  #app { display: flex; flex-direction: column; height: 100dvh; min-height: 560px; }
+  header { flex: none; padding: 18px 28px 0; border-bottom: 1px solid var(--line); }
+  .topline { display: flex; align-items: center; gap: 16px; min-width: 0; }
+  .brand { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  #title { font-size: 20px; font-weight: 650; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #counter { margin-left: auto; flex: none; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  #projects { display: flex; gap: 4px; margin-top: 14px; }
+  #projects button { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); padding: 9px 13px 10px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  #projects button:hover, #projects button:focus-visible { color: var(--text); }
+  #projects button[aria-current="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  #stage-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 12px 28px; overflow: auto; }
+  #stage { position: relative; width: min(100%, calc((100dvh - 300px) * 2)); flex: none; aspect-ratio: 2 / 1; }
+  svg.scene { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .3s ease; pointer-events: none; }
+  svg.scene.active { opacity: 1; pointer-events: auto; }
+  footer { flex: none; padding: 13px 28px 20px; border-top: 1px solid var(--line); background: var(--bg); }
+  #caption { max-width: 1200px; min-height: 56px; color: #f3f7f5; font-size: 18px; line-height: 1.5; }
+  #controls { display: flex; align-items: center; gap: 9px; margin-top: 10px; }
+  .icon-btn { width: 38px; height: 38px; flex: none; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 5px; color: var(--text); background: var(--surface); font-size: 19px; line-height: 1; }
+  .icon-btn:hover:not(:disabled), .icon-btn:focus-visible { border-color: var(--accent); color: var(--accent); }
+  #play[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+  #scene-select { min-width: 130px; max-width: 250px; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--text); }
+  #step-dots { display: flex; align-items: center; gap: 6px; margin-left: 8px; }
+  #step-dots button { width: 27px; height: 7px; padding: 0; border: 0; border-radius: 4px; background: #344346; }
+  #step-dots button[aria-current="step"] { background: var(--accent); }
+  #step-dots button:hover { background: #d9e4df; }
+  #timeline { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: thin; margin-top: 15px; }
+  #timeline button { flex: 1 0 35px; min-width: 35px; height: 5px; padding: 0; border: 0; border-radius: 3px; background: #344346; }
+  #timeline button[data-project="welcome"] { background: #315448; }
+  #timeline button[data-project="machining"] { background: #624632; }
+  #timeline button[aria-current="page"] { background: var(--accent); }
+  svg text { font-family: inherit; }
+  .step { opacity: 0; transition: opacity .45s ease, transform .45s ease; }
+  g.step:not(.packet) { transform: translateY(6px); }
+  .step.on { opacity: 1; transform: none; }
+  .box rect { transition: stroke-width .3s, filter .3s; }
+  .box.hot rect { stroke-width: 2.8; filter: drop-shadow(0 0 10px currentColor); }
+  .link path.flow { stroke-dasharray: 7 6; }
+  .link.hot path.flow { animation: dash .9s linear infinite; filter: drop-shadow(0 0 5px currentColor); stroke-width: 2.4; }
+  .link path.session { stroke-dasharray: 2 5; stroke-linecap: round; }
+  .link.hot path.session { animation: dash .9s linear infinite; filter: drop-shadow(0 0 5px currentColor); }
+  .link.hot path.plain { filter: drop-shadow(0 0 5px currentColor); stroke-width: 2.4; }
+  .packet circle { filter: drop-shadow(0 0 6px currentColor); }
+  @keyframes dash { to { stroke-dashoffset: -26; } }
+  @media (prefers-reduced-motion: reduce) { .link.hot path { animation: none !important; } svg.scene, .step { transition: none; } }
+  @media (max-width: 900px) {
+    header { padding: 10px 15px 0; }
+    #title { font-size: 16px; }
+    .brand { display: none; }
+    #projects { margin-top: 8px; overflow-x: auto; }
+    #projects button { font-size: 12px; }
+    #stage-wrap { justify-content: flex-start; padding: 8px 12px; }
+    #stage { width: min(830px, calc((100dvh - 300px) * 2)); min-width: 600px; }
+    footer { padding: 11px 15px 13px; }
+    #caption { min-height: 68px; font-size: 14px; }
+    #controls { gap: 6px; }
+    #step-dots { margin-left: auto; }
+    #scene-select { min-width: 0; max-width: 170px; }
+    #timeline button { flex-basis: 0; min-width: 20px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="topline"><span class="brand">项目架构介绍</span><span id="title"></span><span id="counter"></span></div>
+    <nav id="projects" aria-label="项目导航">
+      <button type="button" data-project="overview">总览</button>
+      <button type="button" data-project="welcome">Welcome 迎宾机器人</button>
+      <button type="button" data-project="machining">加工监控与反控</button>
+    </nav>
+  </header>
+  <main id="stage-wrap"><div id="stage" aria-live="off"></div></main>
+  <footer>
+    <div id="caption" aria-live="polite"></div>
+    <div id="controls">
+      <button class="icon-btn" id="prev" type="button" title="上一步" aria-label="上一步">←</button>
+      <button class="icon-btn" id="play" type="button" title="自动播放" aria-label="自动播放" aria-pressed="false">▶</button>
+      <button class="icon-btn" id="next" type="button" title="下一步" aria-label="下一步">→</button>
+      <select id="scene-select" aria-label="选择场景"></select>
+      <div id="step-dots" aria-label="当前场景步骤"></div>
     </div>
-    <div class="projects-hero-panel">
-      <span class="projects-panel-label">记录建议</span>
-      <ul class="projects-panel-list">
-        <li>项目目标</li>
-        <li>技术栈</li>
-        <li>阶段进度</li>
-        <li>仓库或演示地址</li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="projects-grid" aria-label="项目卡片列表">
-    
-      <article class="project-card">
-        <div class="project-card-top">
-          <span class="project-status">进行中</span>
-          <a class="project-link" href="/projects/ai-prompt-lab/">查看详情</a>
-        </div>
-
-        <h2 class="project-name">AI Prompt Lab</h2>
-        <p class="project-summary">记录我在提示词工程、工作流拆解和模型调优上的实验结果。</p>
-
-        <div class="project-tags">
-          
-            <span class="project-tag">OpenAI API</span>
-          
-            <span class="project-tag">TypeScript</span>
-          
-            <span class="project-tag">Node.js</span>
-          
-        </div>
-
-        <div class="project-note">
-          <span class="project-note-label">备注</span>
-          <p>可放项目简介、阶段目标、踩坑记录</p>
-        </div>
-      </article>
-    
-      <article class="project-card">
-        <div class="project-card-top">
-          <span class="project-status">已上线</span>
-          <a class="project-link" href="/projects/rust-service-kit/">查看详情</a>
-        </div>
-
-        <h2 class="project-name">Rust Service Kit</h2>
-        <p class="project-summary">一个偏后端工程化的实践合集，沉淀服务治理、日志、配置和部署模板。</p>
-
-        <div class="project-tags">
-          
-            <span class="project-tag">Rust</span>
-          
-            <span class="project-tag">PostgreSQL</span>
-          
-            <span class="project-tag">Docker</span>
-          
-        </div>
-
-        <div class="project-note">
-          <span class="project-note-label">备注</span>
-          <p>可放仓库地址、演示链接、核心设计点</p>
-        </div>
-      </article>
-    
-      <article class="project-card">
-        <div class="project-card-top">
-          <span class="project-status">构思中</span>
-          <a class="project-link" href="/projects/personal-dashboard/">查看详情</a>
-        </div>
-
-        <h2 class="project-name">Personal Dashboard</h2>
-        <p class="project-summary">把阅读、写作、项目进度和技术积累整合进一个可视化个人面板。</p>
-
-        <div class="project-tags">
-          
-            <span class="project-tag">Next.js</span>
-          
-            <span class="project-tag">Charts</span>
-          
-            <span class="project-tag">Tailwind</span>
-          
-        </div>
-
-        <div class="project-note">
-          <span class="project-note-label">备注</span>
-          <p>可放截图、里程碑、后续规划</p>
-        </div>
-      </article>
-    
-  </section>
+    <div id="timeline" aria-label="全部场景"></div>
+  </footer>
 </div>
-</div>
-    <footer class="footer-container">
-  <div class="footer-content">
-    <p class="footer-text">
-      © 2026
-      <a href="https://github.com/touyoutaaa" target="_blank">touyoutaaa</a>.
-      All Rights Reserved.
-    </p>
-  </div>
-</footer>
-
-
-    <div class="to-top">
-  <svg class="icon" aria-hidden="true">
-    <use xlink:href="#icon-arrowup"></use>
-  </svg>
-</div>
-
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const toTop = document.querySelector('.to-top');
-    if (!toTop) return;
+(() => {
+'use strict';
+const NS = 'http://www.w3.org/2000/svg';
+const XLINK = 'http://www.w3.org/1999/xlink';
+const C = {
+  node: '#38bdf8', entry: '#a3e635', exit: '#fbbf24', prov: '#818cf8', exe: '#34d399',
+  talk: '#f472b6', warn: '#f59e0b', err: '#fb7185', mon: '#c084fc', line: '#64748b',
+  text: '#f1f5f9', muted: '#94a3b8', panel: '#0f172a', group: '#111a2e'
+};
 
-    const hasGsap = typeof gsap !== 'undefined';
-
-    if (hasGsap) {
-      // 初始隐藏状态
-      gsap.set(toTop, { opacity: 0, scale: 0.6, display: 'none' });
-      
-      let isVisible = false;
-
-      window.addEventListener('scroll', function () {
-        const shouldShow = window.scrollY > window.innerHeight;
-        
-        if (shouldShow && !isVisible) {
-          isVisible = true;
-          gsap.killTweensOf(toTop);
-          gsap.set(toTop, { display: 'flex' });
-          gsap.to(toTop, {
-            opacity: 1,
-            scale: 1,
-            duration: 0.4,
-            ease: 'back.out(1.7)'
-          });
-        } else if (!shouldShow && isVisible) {
-          isVisible = false;
-          gsap.killTweensOf(toTop);
-          gsap.to(toTop, {
-            opacity: 0,
-            scale: 0.6,
-            duration: 0.3,
-            ease: 'power2.in',
-            onComplete: () => {
-              if (!isVisible) gsap.set(toTop, { display: 'none' });
-            }
-          });
-        }
-      });
-
-      // Hover 交互与磁性效果在 animation.js 中全局托管
-    } else {
-      // 优雅降级：传统滚动监听
-      window.addEventListener('scroll', function () {
-        if (window.scrollY > window.innerHeight) {
-          toTop.style.display = 'flex';
-        } else {
-          toTop.style.display = 'none';
-        }
-      });
-    }
-
-    // 点击事件
-    toTop.addEventListener('click', function () {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    });
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v != null && v !== '') e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function stepAttrs(o) {
+  return { 'data-step': o.step ?? 0, 'data-until': o.until, 'data-hot': o.hot };
+}
+function text(parent, x, y, str, o = {}) {
+  const lines = String(str).split('\n');
+  const t = el('text', { x, y, 'font-size': o.size ?? 13, 'font-weight': o.weight ?? 400,
+    'text-anchor': o.anchor ?? 'start', fill: o.fill ?? C.text, ...(o.attrs || {}) }, parent);
+  lines.forEach((ln, i) => {
+    const ts = el('tspan', { x, dy: i === 0 ? 0 : (o.lh ?? (o.size ?? 13) * 1.3) }, t);
+    ts.textContent = ln;
   });
+  return t;
+}
+
+function makeScene(svg, sceneIndex) {
+  const boxes = {};
+  const markers = new Set();
+  const defs = el('defs', {}, svg);
+  function marker(color, start) {
+    const id = `s${sceneIndex}-m-` + (start ? 's' : 'e') + '-' + color.replace('#', '');
+    if (!markers.has(id)) {
+      markers.add(id);
+      const m = el('marker', { id, viewBox: '0 0 10 10', refX: start ? 1 : 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: start ? 'auto-start-reverse' : 'auto' }, defs);
+      el('path', { d: 'M0,0 L10,5 L0,10 z', fill: color }, m);
+    }
+    return `url(#${id})`;
+  }
+
+  function group(o) {
+    const g = el('g', { class: 'step', ...stepAttrs(o) }, svg);
+    el('rect', { x: o.x, y: o.y, width: o.w, height: o.h, rx: 16, fill: o.fill ?? C.group, stroke: o.color ?? '#1e293b', 'stroke-width': 1, 'stroke-dasharray': o.dashed ? '6 5' : null }, g);
+    if (o.title) text(g, o.x + 14, o.y + 22, o.title, { size: 13, weight: 600, fill: o.color ?? C.muted });
+    return g;
+  }
+
+  function box(o) {
+    const g = el('g', { class: 'box step', id: o.id ? `s${sceneIndex}-b-` + o.id : null, style: `color:${o.color}`, ...stepAttrs(o) }, svg);
+    el('rect', { x: o.x, y: o.y, width: o.w, height: o.h, rx: 12, fill: o.fill ?? C.panel, stroke: o.color, 'stroke-width': 1.6, 'stroke-dasharray': o.dashed ? '5 4' : null }, g);
+    const subLines = o.sub ? String(o.sub).split('\n').length : 0;
+    const titleSize = o.size ?? 15;
+    const subSize = o.subSize ?? 11;
+    const total = titleSize + (subLines ? 6 + subLines * subSize * 1.3 : 0);
+    const top = o.y + o.h / 2 - total / 2;
+    text(g, o.x + o.w / 2, top + titleSize * 0.85, o.title, { size: titleSize, weight: 600, anchor: 'middle', fill: C.text });
+    if (o.sub) text(g, o.x + o.w / 2, top + titleSize + 6 + subSize, o.sub, { size: subSize, anchor: 'middle', fill: C.muted, lh: subSize * 1.3 });
+    if (o.badge) {
+      const bw = o.badge.length * 11 + 14;
+      el('rect', { x: o.x + o.w - bw - 6, y: o.y - 10, width: bw, height: 18, rx: 9, fill: o.color }, g);
+      text(g, o.x + o.w - bw / 2 - 6, o.y + 3, o.badge, { size: 10, weight: 700, anchor: 'middle', fill: '#0b1220' });
+    }
+    boxes[o.id] = o;
+    return g;
+  }
+
+  function anchor(b, side, off = 0) {
+    switch (side) {
+      case 'left': return [b.x, b.y + b.h / 2 + off];
+      case 'right': return [b.x + b.w, b.y + b.h / 2 + off];
+      case 'top': return [b.x + b.w / 2 + off, b.y];
+      default: return [b.x + b.w / 2 + off, b.y + b.h];
+    }
+  }
+  const normal = { left: [-1, 0], right: [1, 0], top: [0, -1], bottom: [0, 1] };
+  function bez(p, c1, c2, q, t) {
+    const u = 1 - t;
+    return [
+      u * u * u * p[0] + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t * t * t * q[0],
+      u * u * u * p[1] + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t * t * t * q[1]
+    ];
+  }
+  function link(o) {
+    const a = boxes[o.from], b = boxes[o.to];
+    if (!a || !b) return null;
+    const p = anchor(a, o.fs, o.offA || 0), q = anchor(b, o.ts, o.offB || 0);
+    const d = Math.hypot(q[0] - p[0], q[1] - p[1]);
+    const k = Math.max(o.minBend ?? 36, d * (o.bend ?? 0.4));
+    const na = normal[o.fs], nb = normal[o.ts];
+    const c1 = [p[0] + na[0] * k, p[1] + na[1] * k], c2 = [q[0] + nb[0] * k, q[1] + nb[1] * k];
+    const path = `M${p[0]},${p[1]} C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${q[0]},${q[1]}`;
+    const mid = bez(p, c1, c2, q, o.labelT ?? 0.5);
+    const color = o.color || C.line;
+    const g = el('g', { class: 'link step', style: `color:${color}`, ...stepAttrs(o) }, svg);
+    const cls = o.kind === 'session' ? 'session' : o.kind === 'plain' ? 'plain' : 'flow';
+    el('path', { id: `s${sceneIndex}-p-` + o.id, d: path, fill: 'none', stroke: color, 'stroke-width': 1.8, class: cls,
+      'marker-end': o.noArrow ? null : marker(color, false), 'marker-start': o.bidir ? marker(color, true) : null }, g);
+    if (o.label) {
+      const lines = o.label.split('\n');
+      const w = Math.max(...lines.map(l => l.length)) * 6.6 + 12, h = 14 * lines.length + 6;
+      const lx = mid[0] + (o.labelDx || 0), ly = mid[1] + (o.labelDy || 0);
+      el('rect', { x: lx - w / 2, y: ly - h / 2, width: w, height: h, rx: 6, fill: '#0b1220', stroke: color, 'stroke-opacity': .35 }, g);
+      text(g, lx, ly - h / 2 + 13, o.label, { size: 11, anchor: 'middle', fill: color, lh: 14 });
+    }
+    return g;
+  }
+  function packet(o) {
+    const g = el('g', { class: 'packet step', style: `color:${o.color || C.exe}`, 'data-step': o.step, 'data-until': o.until ?? o.step }, svg);
+    el('circle', { r: o.r || 6, fill: o.color || C.exe }, g);
+    if (o.label) text(g, 0, -11, o.label, { size: 11, weight: 600, anchor: 'middle', fill: o.color || C.exe });
+    const am = el('animateMotion', { dur: (o.dur || 1.8) + 's', repeatCount: 'indefinite', begin: (o.delay || 0) + 's' }, g);
+    const mp = el('mpath', {}, am);
+    mp.setAttribute('href', `#s${sceneIndex}-p-` + o.path);
+    mp.setAttributeNS(XLINK, 'xlink:href', `#s${sceneIndex}-p-` + o.path);
+    return g;
+  }
+  function note(o) {
+    const lines = String(o.lines).split('\n');
+    const size = o.size ?? 12.5, lh = size * 1.45;
+    const h = o.h ?? lines.length * lh + 18;
+    const g = el('g', { class: 'step', ...stepAttrs(o) }, svg);
+    el('rect', { x: o.x, y: o.y, width: o.w, height: h, rx: 10, fill: '#0b1220', stroke: o.color ?? C.warn, 'stroke-width': 1.2, 'stroke-opacity': .7 }, g);
+    if (o.title) text(g, o.x + 12, o.y + 17, o.title, { size: 11, weight: 700, fill: o.color ?? C.warn });
+    text(g, o.x + 12, o.y + (o.title ? 34 : 14 + size * 0.8), o.lines, { size, fill: C.text, lh });
+    return g;
+  }
+  function bubble(o) {
+    const g = el('g', { class: 'step', ...stepAttrs(o) }, svg);
+    const w = o.w ?? o.text.length * 15 + 26, h = 36;
+    el('rect', { x: o.x, y: o.y, width: w, height: h, rx: 18, fill: o.color ?? C.entry }, g);
+    el('path', { d: `M${o.x + 20},${o.y + h} l6,10 l6,-10 z`, fill: o.color ?? C.entry }, g);
+    text(g, o.x + w / 2, o.y + 23, o.text, { size: 14, weight: 600, anchor: 'middle', fill: '#0b1220' });
+    return g;
+  }
+  function heading(x, y, str, o = {}) {
+    return text(svg, x, y, str, { size: o.size ?? 15, weight: 600, fill: o.fill ?? C.muted, anchor: o.anchor });
+  }
+  return { svg, boxes, group, box, link, packet, note, bubble, heading };
+}
+
+
+const scenes = [];
+scenes.push({
+  project: 'overview', title: '两个项目 · 一份介绍',
+  captions: ['两套独立系统：Welcome 将现场感知转成播报与机器人动作；加工监控与反控将设备数据转成过程判定与机床控制。'],
+  build(s) {
+    text(s.svg, 70, 90, '项目架构介绍', { size: 39, weight: 700, fill: C.text });
+    text(s.svg, 70, 135, '两条独立主线', { size: 18, fill: C.muted });
+    el('path', { d: 'M70 189 H1210', stroke: '#344346', 'stroke-width': 1 }, s.svg);
+    text(s.svg, 70, 252, '01', { size: 21, weight: 700, fill: '#80d5b6' });
+    text(s.svg, 140, 252, 'Welcome 迎宾机器人', { size: 33, weight: 700, fill: C.text });
+    text(s.svg, 140, 298, '感知 → 决策 → 表达 / 动作', { size: 21, fill: '#80d5b6' });
+    el('path', { d: 'M70 359 H1210', stroke: '#344346', 'stroke-width': 1 }, s.svg);
+    text(s.svg, 70, 422, '02', { size: 21, weight: 700, fill: '#f1b67a' });
+    text(s.svg, 140, 422, '加工监控与反控', { size: 33, weight: 700, fill: C.text });
+    text(s.svg, 140, 468, '采集 → 组帧 → 对齐 → 判定 → 反控', { size: 21, fill: '#f1b67a' });
+    el('path', { d: 'M70 530 H1210', stroke: '#344346', 'stroke-width': 1 }, s.svg);
+  }
+});
+// 2 主干
+scenes.push({
+  title: '主干',
+  captions: [
+    '导航图有两条链：上链表达，下链动作。现场输入进 asr 与 vlm，executor 决策，talker 说话，tts 播报。',
+    '同一份决策经 mcp 下发：x1_pro_actions 提供 MCP 工具，x1_core 是 REST 网关，最后驱动真机。',
+    '回执原路返回形成闭环；planner 只是 executor 打开的会话。provider 全部由 adapters 在装配期注入。'
+  ],
+  build(s) {
+    s.box({ id: 'input', x: 40, y: 110, w: 150, h: 100, title: '现场', sub: '麦克风 · 相机', color: C.entry, step: 0, hot: '0' });
+    s.box({ id: 'asr', x: 240, y: 70, w: 140, h: 64, title: 'asr', sub: '语音识别', color: C.node, step: 0, hot: '0' });
+    s.box({ id: 'vlm', x: 240, y: 158, w: 140, h: 64, title: 'vlm', sub: '视觉理解', color: C.node, step: 0, hot: '0' });
+    s.box({ id: 'exe', x: 430, y: 105, w: 170, h: 110, title: 'executor', sub: '决策与执行', color: C.exe, step: 0, hot: '0', badge: '核心 A' });
+    s.box({ id: 'tk', x: 650, y: 105, w: 160, h: 110, title: 'talker', sub: '话术生成', color: C.talk, step: 0, hot: '0', badge: '核心 B' });
+    s.box({ id: 'tts', x: 860, y: 125, w: 150, h: 80, title: 'tts', sub: '语音合成', color: C.node, step: 0, hot: '0' });
+    s.box({ id: 'termOut', x: 1060, y: 125, w: 160, h: 80, title: '终端下行', sub: '播报', color: C.exit, step: 0, hot: '0' });
+
+    s.box({ id: 'pl', x: 650, y: 270, w: 150, h: 70, title: 'planner', sub: '会话式规划 · 孤岛', color: C.warn, step: 2, dashed: true, hot: '2' });
+    s.box({ id: 'mcp', x: 430, y: 410, w: 150, h: 80, title: 'mcp', sub: '动作库 + 反馈', color: C.node, step: 1, hot: '1' });
+    s.box({ id: 'act', x: 630, y: 410, w: 180, h: 80, title: 'x1_pro_actions', sub: 'MCP server · 动作编排', color: C.exit, step: 1, hot: '1' });
+    s.box({ id: 'gw', x: 860, y: 410, w: 150, h: 80, title: 'x1_core 网关', sub: 'REST /api/v1', color: C.exit, step: 1, hot: '1' });
+    s.box({ id: 'hw', x: 1060, y: 410, w: 160, h: 80, title: '真机', sub: '机械臂 · 底盘', color: C.err, step: 1, hot: '1' });
+    s.box({ id: 'sim', x: 860, y: 545, w: 180, h: 50, title: '共享仿真', sub: '可切换替身', color: C.exit, step: 2, dashed: true, hot: '2' });
+    s.note({ x: 40, y: 545, w: 360, h: 50, lines: 'provider 直连：LLM ×3 · 火山 ASR · 火山 TTS\n由 adapters 在装配期注入', step: 2, color: C.prov, size: 12 });
+
+    s.link({ id: 'i2a', from: 'input', to: 'asr', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.entry, offA: -25, minBend: 24 });
+    s.link({ id: 'i2v', from: 'input', to: 'vlm', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.entry, offA: 25, minBend: 24 });
+    s.link({ id: 'a2e', from: 'asr', to: 'exe', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.node, offB: -28, minBend: 20 });
+    s.link({ id: 'v2e', from: 'vlm', to: 'exe', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.node, offB: 28, minBend: 20 });
+    s.link({ id: 'e2t', from: 'exe', to: 'tk', fs: 'right', ts: 'left', label: '定句', step: 0, hot: '0', color: C.exe, minBend: 18 });
+    s.link({ id: 't2t', from: 'tk', to: 'tts', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.talk, minBend: 18 });
+    s.link({ id: 't2o', from: 'tts', to: 'termOut', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.exit, minBend: 18 });
+
+    s.link({ id: 'e2m', from: 'exe', to: 'mcp', fs: 'bottom', ts: 'top', label: '能力指令', step: 1, hot: '1', color: C.exe, minBend: 30 });
+    s.link({ id: 'm2a', from: 'mcp', to: 'act', fs: 'right', ts: 'left', label: 'MCP', step: 1, hot: '1', color: C.node, minBend: 18 });
+    s.link({ id: 'a2g', from: 'act', to: 'gw', fs: 'right', ts: 'left', label: 'REST', step: 1, hot: '1', color: C.exit, minBend: 18 });
+    s.link({ id: 'g2h', from: 'gw', to: 'hw', fs: 'right', ts: 'left', step: 1, hot: '1', color: C.err, minBend: 18 });
+    s.link({ id: 'a2s', from: 'act', to: 'sim', fs: 'bottom', ts: 'left', label: '装配期切换', step: 2, hot: '2', color: C.exit, kind: 'session', offA: -40, minBend: 20 });
+    s.link({ id: 'back', from: 'act', to: 'mcp', fs: 'bottom', ts: 'bottom', label: '动作回执', step: 2, hot: '2', color: C.exit, offA: 20, offB: -30, bend: .12, minBend: 40, labelDy: 24 });
+    s.link({ id: 'sess', from: 'exe', to: 'pl', fs: 'bottom', ts: 'top', label: 'PlanRequest ↔ PlannerMessage', step: 2, hot: '2', color: C.warn, kind: 'session', bidir: true, offA: 90, minBend: 30, labelDx: 60 });
+
+    s.packet({ path: 'i2a', step: 0, until: 0, color: C.entry, dur: 1.2 });
+    s.packet({ path: 'e2t', step: 0, until: 0, color: C.exe, dur: 1.2, delay: .5 });
+    s.packet({ path: 'e2m', step: 1, until: 1, color: C.exe, dur: 1.3 });
+    s.packet({ path: 'a2g', step: 1, until: 1, color: C.exit, dur: 1.2, delay: .5 });
+    s.packet({ path: 'back', step: 2, until: 2, color: C.exit, label: '回执', dur: 1.8 });
+  }
+});
+
+// 3 双核心
+scenes.push({
+  title: '双核心',
+  captions: [
+    'executor 的四条输入在节点内 fan_in 归并：vlm / asr / mcp / plan，没有独立的 merger 节点。',
+    '同一份事实转发一份给 talker：executor 决定做什么，talker 决定说什么，弱同步；planner 只收会话、只回消息。'
+  ],
+  build(s) {
+    s.box({ id: 'vlm', x: 60, y: 80, w: 160, h: 64, title: 'vlm', sub: '视觉事件', color: C.node, step: 0, hot: '0' });
+    s.box({ id: 'asr', x: 60, y: 170, w: 160, h: 64, title: 'asr', sub: '语音定句', color: C.node, step: 0, hot: '0' });
+    s.box({ id: 'mcp', x: 60, y: 260, w: 160, h: 64, title: 'mcp', sub: '动作反馈', color: C.node, step: 0, hot: '0' });
+    s.box({ id: 'plan', x: 60, y: 350, w: 160, h: 64, title: 'plan', sub: '规划消息', color: C.warn, step: 0, hot: '0' });
+    s.box({ id: 'exe', x: 360, y: 150, w: 220, h: 210, title: 'executor', sub: 'fan_in 归并成一条事件流\n决策 → 动作', color: C.exe, step: 0, hot: '0 1', badge: '核心 A' });
+    s.box({ id: 'tk', x: 740, y: 150, w: 200, h: 210, title: 'talker', sub: '决定说什么\n话术 → 播报', color: C.talk, step: 0, hot: '0 1', badge: '核心 B' });
+    s.box({ id: 'pl', x: 740, y: 450, w: 200, h: 70, title: 'planner', sub: '只收会话 · 只回消息', color: C.warn, step: 1, hot: '1', dashed: true });
+    s.note({ x: 1020, y: 170, w: 210, h: 70, title: '输出一', lines: 'executor → mcp\n动作下发', step: 0, color: C.exe, size: 12 });
+    s.note({ x: 1020, y: 270, w: 210, h: 70, title: '输出二', lines: 'talker → tts\n语音播报', step: 0, color: C.talk, size: 12 });
+    s.link({ id: 'v2e', from: 'vlm', to: 'exe', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.node, offB: -75, minBend: 24 });
+    s.link({ id: 'a2e', from: 'asr', to: 'exe', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.node, offB: -25, minBend: 24 });
+    s.link({ id: 'm2e', from: 'mcp', to: 'exe', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.node, offB: 25, minBend: 24 });
+    s.link({ id: 'p2e', from: 'plan', to: 'exe', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.warn, offB: 75, minBend: 24 });
+    s.link({ id: 'fwd1', from: 'exe', to: 'tk', fs: 'right', ts: 'left', label: '同一定句', step: 1, hot: '1', color: C.exe, offA: 40, offB: 40, minBend: 18 });
+    s.link({ id: 'fwd2', from: 'exe', to: 'tk', fs: 'right', ts: 'left', label: 'planner 消息', step: 1, hot: '1', color: C.exe, offA: -40, offB: -40, minBend: 18 });
+    s.link({ id: 'sess', from: 'exe', to: 'pl', fs: 'bottom', ts: 'top', label: '会话通道', step: 1, hot: '1', color: C.warn, kind: 'session', bidir: true, offA: 20, minBend: 30 });
+    s.packet({ path: 'a2e', step: 0, until: 0, color: C.node, dur: 1.2 });
+    s.packet({ path: 'fwd1', step: 1, until: 1, color: C.exe, dur: 1.3 });
+    s.packet({ path: 'fwd2', step: 1, until: 1, color: C.exe, dur: 1.3, delay: .6 });
+  }
+});
+
+// 4 动作链路
+scenes.push({
+  title: '动作链路',
+  captions: [
+    '动作链只有三段：mcp 持有动作库与反馈，x1_pro_actions 提供 MCP 工具 exe_ability / get_ability_status，x1_core 网关驱动真机。',
+    '同一条 MCP 接缝可以切到共享仿真；连不上就显式退出，不降级为进程内替身。回执经 mcp 回到 executor。'
+  ],
+  build(s) {
+    s.box({ id: 'exe', x: 60, y: 250, w: 170, h: 100, title: 'executor', sub: '决策', color: C.exe, step: 0, hot: '0' });
+    s.box({ id: 'mcp', x: 280, y: 250, w: 170, h: 100, title: 'mcp', sub: '动作库 + 反馈', color: C.node, step: 0, hot: '0 1' });
+    s.box({ id: 'act', x: 500, y: 250, w: 200, h: 100, title: 'x1_pro_actions', sub: 'MCP server\n动作编排', color: C.exit, step: 0, hot: '0 1' });
+    s.box({ id: 'gw', x: 750, y: 250, w: 170, h: 100, title: 'x1_core 网关', sub: 'REST /api/v1', color: C.exit, step: 0, hot: '0' });
+    s.box({ id: 'hw', x: 970, y: 250, w: 160, h: 100, title: '真机', sub: '机械臂 · 底盘', color: C.err, step: 0, hot: '0' });
+    s.box({ id: 'sim', x: 500, y: 450, w: 200, h: 80, title: '共享仿真', sub: 'MotionActionService · MCP', color: C.exit, step: 1, dashed: true, hot: '1' });
+    s.note({ x: 750, y: 450, w: 380, h: 80, title: '失败显式抛出', lines: '连不上真机 / 仿真直接退出\n不做降级托底，避免异常被模拟掩盖', step: 1, color: C.err, size: 12 });
+    s.link({ id: 'e2m', from: 'exe', to: 'mcp', fs: 'right', ts: 'left', label: '指令', step: 0, hot: '0', color: C.exe, minBend: 20 });
+    s.link({ id: 'm2a', from: 'mcp', to: 'act', fs: 'right', ts: 'left', label: 'MCP 工具', step: 0, hot: '0', color: C.node, minBend: 20 });
+    s.link({ id: 'a2g', from: 'act', to: 'gw', fs: 'right', ts: 'left', label: 'REST', step: 0, hot: '0', color: C.exit, minBend: 20 });
+    s.link({ id: 'g2h', from: 'gw', to: 'hw', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.err, minBend: 20 });
+    s.link({ id: 'a2s', from: 'act', to: 'sim', fs: 'bottom', ts: 'top', label: '装配期切换', step: 1, hot: '1', color: C.exit, kind: 'session', minBend: 24 });
+    s.link({ id: 'back', from: 'act', to: 'mcp', fs: 'bottom', ts: 'bottom', label: '回执', step: 1, hot: '1', color: C.exit, offA: 40, offB: -20, bend: .12, minBend: 36, labelDy: 22 });
+    s.link({ id: 'fb', from: 'mcp', to: 'exe', fs: 'top', ts: 'top', label: '反馈', step: 1, hot: '1', color: C.node, offA: 20, offB: -20, bend: .12, minBend: 36, labelDy: -22 });
+    s.packet({ path: 'm2a', step: 0, until: 0, color: C.node, dur: 1.2 });
+    s.packet({ path: 'a2g', step: 0, until: 0, color: C.exit, dur: 1.2, delay: .5 });
+    s.packet({ path: 'back', step: 1, until: 1, color: C.exit, label: '回执', dur: 1.4 });
+  }
+});
+
+// 5 分层
+scenes.push({
+  title: 'crate 分层',
+  captions: [
+    'core 是纯领域库；monitor / replay / adapters 只依赖 core；runtime 独占装配，graph.rs 是唯一接线点；service 是唯一进程入口。',
+    '前端不进 Cargo workspace，只按 docs/api 契约对接。'
+  ],
+  build(s) {
+    s.box({ id: 'service', x: 330, y: 100, w: 520, h: 64, title: 'service', sub: '唯一进程入口 · 配置 · Monitor · HTTP', color: C.exit, step: 1, hot: '1' });
+    s.box({ id: 'runtime', x: 330, y: 210, w: 520, h: 70, title: 'runtime', sub: 'RuntimeManager · Global Mix · Clamp · graph.rs 唯一接线点', color: C.node, step: 0, hot: '0' });
+    s.box({ id: 'monitor', x: 170, y: 330, w: 220, h: 64, title: 'monitor', sub: '观测消费端', color: C.mon, step: 0, hot: '0' });
+    s.box({ id: 'replay', x: 410, y: 330, w: 220, h: 64, title: 'replay', sub: '录制与回放', color: C.mon, step: 0, hot: '0' });
+    s.box({ id: 'adapters', x: 650, y: 330, w: 200, h: 64, title: 'adapters', sub: 'LLM · MCP · ASR · TTS', color: C.prov, step: 0, hot: '0' });
+    s.box({ id: 'core', x: 330, y: 450, w: 520, h: 70, title: 'core', sub: '协议 · 7 个节点逻辑 · 配置 schema · 观测生产端', color: C.exe, step: 0, hot: '0' });
+    s.box({ id: 'web', x: 1010, y: 100, w: 230, h: 64, title: 'web 前端', sub: 'React 19 · 不进 workspace', color: C.talk, step: 1, hot: '1' });
+    s.box({ id: 'contract', x: 1010, y: 210, w: 230, h: 64, title: 'docs/api 契约', sub: 'HTTP / SSE / WS', color: C.talk, step: 1, dashed: true, hot: '1' });
+    s.link({ id: 's2r', from: 'service', to: 'runtime', fs: 'bottom', ts: 'top', step: 1, hot: '1', color: C.exit, minBend: 18 });
+    s.link({ id: 'r2mo', from: 'runtime', to: 'monitor', fs: 'bottom', ts: 'top', step: 0, hot: '0', color: C.node, offA: -170, minBend: 24 });
+    s.link({ id: 'r2rp', from: 'runtime', to: 'replay', fs: 'bottom', ts: 'top', step: 0, hot: '0', color: C.node, minBend: 24 });
+    s.link({ id: 'r2ad', from: 'runtime', to: 'adapters', fs: 'bottom', ts: 'top', step: 0, hot: '0', color: C.node, offA: 190, minBend: 24 });
+    s.link({ id: 'mo2c', from: 'monitor', to: 'core', fs: 'bottom', ts: 'top', label: '消息类型', step: 0, hot: '0', color: C.mon, offB: -150, minBend: 24 });
+    s.link({ id: 'rp2c', from: 'replay', to: 'core', fs: 'bottom', ts: 'top', step: 0, hot: '0', color: C.mon, offB: 0, minBend: 24 });
+    s.link({ id: 'ad2c', from: 'adapters', to: 'core', fs: 'bottom', ts: 'top', step: 0, hot: '0', color: C.prov, offB: 175, minBend: 24 });
+    s.link({ id: 'w2s', from: 'web', to: 'service', fs: 'left', ts: 'right', label: '契约对接', step: 1, hot: '1', color: C.talk, minBend: 30 });
+    s.link({ id: 'c2s', from: 'contract', to: 'service', fs: 'left', ts: 'bottom', label: '约束', step: 1, hot: '1', color: C.talk, kind: 'session', offB: 200, bend: .4 });
+  }
+});
+
+
+const machiningStart = scenes.length;
+// 1 开场
+scenes.push({
+  title: '开场',
+  captions: [
+    '这是面向数控机床与 PLC 的加工监控与反控系统：数据从设备进来，带着加工语义，完成判定后再回到机床。'
+  ],
+  build(s) {
+    text(s.svg, 640, 250, '加工监控与反控', { size: 76, weight: 700, anchor: 'middle', fill: C.text });
+    text(s.svg, 640, 304, '采集 → 组帧 → 对齐 → 判定 → 反控', { size: 26, anchor: 'middle', fill: C.muted });
+  }
+});
+
+// 2 全景：一条主干
+scenes.push({
+  title: '主干',
+  captions: [
+    '主干只有五段：设备接入、实时引擎、过程对齐、业务判定、决策执行。数据从左往右，决策从右回左。',
+    '设备接入统一多种协议；实时引擎按固定频率组帧；过程对齐切出工件与工步；业务模块据此判定；执行层把决策送回机床。',
+    '左侧是数据面：连续、高频、实时。右侧回程是控制面：低频、带应答、可追溯。'
+  ],
+  build(s) {
+    const y = 300;
+    s.box({ id: 'dev', x: 40, y: 240, w: 150, h: 120, title: '设备', sub: '机床 · PLC · 传感器', color: C.entry, step: 0, hot: '0' });
+    s.box({ id: 'ing', x: 250, y: 250, w: 160, h: 100, title: '设备接入', sub: '统一多协议采集', color: C.node, step: 0, hot: '1' });
+    s.box({ id: 'eng', x: 470, y: 250, w: 160, h: 100, title: '实时引擎', sub: '固定频率组帧', color: C.node, step: 0, hot: '1' });
+    s.box({ id: 'aln', x: 690, y: 250, w: 170, h: 100, title: '过程对齐', sub: '工件 · 工步 · 窗口', color: C.exe, step: 0, hot: '1' });
+    s.box({ id: 'biz', x: 920, y: 250, w: 170, h: 100, title: '业务判定', sub: '四个模块并行', color: C.talk, step: 0, hot: '2' });
+    s.box({ id: 'act', x: 1150, y: 250, w: 110, h: 100, title: '执行', sub: '反控下发', color: C.exit, step: 0, hot: '2' });
+    s.link({ id: 'a', from: 'dev', to: 'ing', fs: 'right', ts: 'left', label: '数据', step: 0, hot: '1', color: C.entry, minBend: 24 });
+    s.link({ id: 'b', from: 'ing', to: 'eng', fs: 'right', ts: 'left', step: 0, hot: '1', color: C.node, minBend: 24 });
+    s.link({ id: 'c', from: 'eng', to: 'aln', fs: 'right', ts: 'left', step: 0, hot: '1', color: C.node, minBend: 24 });
+    s.link({ id: 'd', from: 'aln', to: 'biz', fs: 'right', ts: 'left', step: 0, hot: '1', color: C.exe, minBend: 24 });
+    s.link({ id: 'e', from: 'biz', to: 'act', fs: 'right', ts: 'left', step: 0, hot: '2', color: C.talk, minBend: 24 });
+    s.link({ id: 'back', from: 'act', to: 'dev', fs: 'bottom', ts: 'bottom', label: '决策回程', step: 0, hot: '2', color: C.exit, bend: .12, minBend: 40, offA: -10, offB: 20, labelDy: 22 });
+    s.packet({ path: 'a', step: 0, until: 0, color: C.entry, dur: 1.3 });
+    s.packet({ path: 'c', step: 1, until: 1, color: C.node, dur: 1.3 });
+    s.packet({ path: 'e', step: 2, until: 2, color: C.talk, dur: 1.2 });
+    s.packet({ path: 'back', step: 2, until: 2, color: C.exit, label: '命令', dur: 1.8 });
+  }
+});
+
+// 3 业务判定
+scenes.push({
+  title: '业务判定',
+  captions: [
+    '同一条过程数据流分给四个模块：边界监控看过程异常，颤振抑制看稳定性，自适应控制调进给与转速。',
+    '前三个实时消费；趋势分析不占实时通道，过程结束后回库重算。'
+  ],
+  build(s) {
+    s.box({ id: 'bus', x: 60, y: 250, w: 180, h: 110, title: '过程数据流', sub: '带工件与工步语义', color: C.mon, step: 0, hot: '0' });
+    s.box({ id: 'b1', x: 400, y: 90, w: 280, h: 90, title: '边界监控', sub: '过程异常', color: C.talk, step: 0, hot: '0' });
+    s.box({ id: 'b2', x: 400, y: 210, w: 280, h: 90, title: '颤振抑制', sub: '稳定性', color: C.talk, step: 0, hot: '0' });
+    s.box({ id: 'b3', x: 400, y: 330, w: 280, h: 90, title: '自适应控制', sub: '进给 · 转速', color: C.talk, step: 0, hot: '0' });
+    s.box({ id: 't', x: 400, y: 470, w: 280, h: 90, title: '趋势分析', sub: '过程结束后回库重算', color: C.prov, step: 1, dashed: true, hot: '1' });
+    s.box({ id: 'db', x: 800, y: 470, w: 200, h: 90, title: '已落库过程', sub: '完整数据', color: C.exe, step: 1, hot: '1' });
+    s.box({ id: 'out', x: 800, y: 170, w: 200, h: 160, title: '判定结果', sub: '告警 · 参数建议', color: C.warn, step: 0, hot: '0' });
+    s.link({ id: 'x1', from: 'bus', to: 'b1', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.mon, offA: -30, minBend: 30 });
+    s.link({ id: 'x2', from: 'bus', to: 'b2', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.mon, minBend: 30 });
+    s.link({ id: 'x3', from: 'bus', to: 'b3', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.mon, offA: 30, minBend: 30 });
+    s.link({ id: 'x4', from: 'bus', to: 't', fs: 'right', ts: 'left', step: 1, hot: '1', color: C.prov, kind: 'session', offA: 50, minBend: 30 });
+    s.link({ id: 'y1', from: 'b1', to: 'out', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.talk, offB: -40, minBend: 30 });
+    s.link({ id: 'y2', from: 'b2', to: 'out', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.talk, minBend: 30 });
+    s.link({ id: 'y3', from: 'b3', to: 'out', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.talk, offB: 40, minBend: 30 });
+    s.link({ id: 'z', from: 't', to: 'db', fs: 'right', ts: 'left', label: '读完整过程', step: 1, hot: '1', color: C.prov, kind: 'session', minBend: 24 });
+    s.packet({ path: 'x2', step: 0, until: 0, color: C.mon, dur: 1.3 });
+    s.packet({ path: 'y2', step: 0, until: 0, color: C.talk, dur: 1.3, delay: .4 });
+    s.packet({ path: 'z', step: 1, until: 1, color: C.prov, dur: 1.4 });
+  }
+});
+
+// 4 反控闭环
+scenes.push({
+  title: '反控闭环',
+  captions: [
+    '判定结果进入执行层，转成设备命令下发回机床，形成闭环。',
+    '控制面用广播加显式应答：服务之间不点对点路由，请求带应答口，超时是显式错误。参数变更写库后按版本对账生效。'
+  ],
+  build(s) {
+    s.box({ id: 'j', x: 70, y: 250, w: 200, h: 110, title: '业务判定', sub: '告警 · 参数建议', color: C.talk, step: 0, hot: '0' });
+    s.box({ id: 'e', x: 360, y: 250, w: 200, h: 110, title: '执行层', sub: '统一收口 · 异步执行', color: C.exit, step: 0, hot: '0' });
+    s.box({ id: 'd', x: 650, y: 250, w: 200, h: 110, title: '设备接入', sub: '下发到机床', color: C.node, step: 0, hot: '0' });
+    s.box({ id: 'm', x: 940, y: 250, w: 200, h: 110, title: '机床参数', sub: '倍率 · 进给', color: C.warn, step: 0, hot: '0' });
+    s.link({ id: 'p1', from: 'j', to: 'e', fs: 'right', ts: 'left', label: '决策', step: 0, hot: '0', color: C.talk, minBend: 26 });
+    s.link({ id: 'p2', from: 'e', to: 'd', fs: 'right', ts: 'left', label: '命令', step: 0, hot: '0', color: C.exit, minBend: 26 });
+    s.link({ id: 'p3', from: 'd', to: 'm', fs: 'right', ts: 'left', step: 0, hot: '0', color: C.node, minBend: 26 });
+    s.packet({ path: 'p1', step: 0, until: 0, color: C.talk, dur: 1.2 });
+    s.packet({ path: 'p2', step: 0, until: 0, color: C.exit, dur: 1.2, delay: .4 });
+    s.packet({ path: 'p3', step: 0, until: 0, color: C.node, dur: 1.1, delay: .8 });
+    s.box({ id: 'w', x: 360, y: 470, w: 200, h: 90, title: '参数写库', sub: '唯一事实来源', color: C.exe, step: 1, hot: '1' });
+    s.box({ id: 'r', x: 650, y: 470, w: 200, h: 90, title: '运行任务生效', sub: '版本对账', color: C.node, step: 1, hot: '1' });
+    s.link({ id: 'p4', from: 'w', to: 'r', fs: 'right', ts: 'left', label: '变更事件', step: 1, hot: '1', color: C.mon, minBend: 24 });
+    s.packet({ path: 'p4', step: 1, until: 1, color: C.mon, dur: 1.2 });
+  }
+});
+
+// 5 收尾
+scenes.push({
+  title: '收尾',
+  captions: [
+    '一句话：接入统一、时间轴统一、对齐赋予语义、业务并行判定、执行收口反控。平台负责存储、参数与观测。'
+  ],
+  build(s) {
+    text(s.svg, 640, 190, '加工监控与反控 · 主线', { size: 36, weight: 700, anchor: 'middle', fill: C.text });
+    const cols = [
+      ['接入', C.node], ['组帧', C.node], ['对齐', C.exe], ['判定', C.talk], ['反控', C.exit]
+    ];
+    cols.forEach(([t, c], i) => {
+      const x = 90 + i * 220;
+      const g = el('g', { class: 'step', 'data-step': 0 }, s.svg);
+      el('rect', { x, y: 280, width: 180, height: 90, rx: 14, fill: C.panel, stroke: c, 'stroke-width': 1.6 }, g);
+      text(g, x + 90, 336, t, { size: 24, weight: 700, anchor: 'middle', fill: c });
+      if (i < cols.length - 1) {
+        el('path', { d: `M${x + 186},325 h28`, stroke: '#334155', 'stroke-width': 2, fill: 'none' }, g);
+      }
+    });
+    text(s.svg, 640, 470, '平台：双存储分工 · 参数热更新 · 观测旁路', { size: 18, anchor: 'middle', fill: C.muted });
+  }
+});
+
+
+scenes.forEach((scene, index) => {
+  if (!scene.project) scene.project = index < machiningStart ? 'welcome' : 'machining';
+  scene.title = ({ '主干': '系统主干', 'crate 分层': '工程分层', '开场': '项目概览', '收尾': '项目回顾' })[scene.title] || scene.title;
+});
+
+const stage = document.getElementById('stage');
+const titleEl = document.getElementById('title');
+const counterEl = document.getElementById('counter');
+const captionEl = document.getElementById('caption');
+const selectEl = document.getElementById('scene-select');
+const stepDots = document.getElementById('step-dots');
+const timeline = document.getElementById('timeline');
+const playEl = document.getElementById('play');
+const prevEl = document.getElementById('prev');
+const nextEl = document.getElementById('next');
+const projectButtons = [...document.querySelectorAll('#projects button')];
+const projectNames = { overview: '总览', welcome: 'Welcome 迎宾机器人', machining: '加工监控与反控' };
+const projectColors = { overview: '#d6e1db', welcome: '#80d5b6', machining: '#f1b67a' };
+const svgs = scenes.map((scene, i) => {
+  const svg = el('svg', { viewBox: '0 0 1280 640', class: 'scene', role: 'img', 'aria-label': projectNames[scene.project] + '：' + scene.title }, stage);
+  scene.build(makeScene(svg, i));
+  svg.setAttribute('aria-hidden', 'true');
+  return svg;
+});
+let current = 0, step = 0, timer = null;
+const params = new URLSearchParams(location.search);
+const requestedDelay = Number(params.get('dt'));
+const autoMs = requestedDelay > 0 ? Math.max(1000, requestedDelay * 1000) : 7000;
+
+for (const project of ['overview', 'welcome', 'machining']) {
+  const group = document.createElement('optgroup');
+  group.label = projectNames[project];
+  scenes.forEach((scene, i) => {
+    if (scene.project !== project) return;
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = scene.title;
+    group.appendChild(option);
+  });
+  selectEl.appendChild(group);
+}
+scenes.forEach((scene, i) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.project = scene.project;
+  button.title = projectNames[scene.project] + ' · ' + scene.title;
+  button.setAttribute('aria-label', button.title);
+  button.addEventListener('click', () => go(i, 0));
+  timeline.appendChild(button);
+});
+
+function render() {
+  const scene = scenes[current];
+  document.documentElement.style.setProperty('--accent', projectColors[scene.project]);
+  svgs.forEach((svg, i) => {
+    svg.classList.toggle('active', i === current);
+    svg.setAttribute('aria-hidden', String(i !== current));
+  });
+  svgs[current].querySelectorAll('[data-step]').forEach(node => {
+    const from = Number(node.dataset.step || 0);
+    const until = node.dataset.until === undefined ? Infinity : Number(node.dataset.until);
+    const on = step >= from && step <= until;
+    node.classList.toggle('on', on);
+    node.classList.toggle('hot', on && (node.dataset.hot || '').split(' ').includes(String(step)));
+  });
+  titleEl.textContent = scene.project === 'overview' ? scene.title : projectNames[scene.project] + ' · ' + scene.title;
+  counterEl.textContent = (current + 1) + ' / ' + scenes.length + ' · ' + (step + 1) + ' / ' + scene.captions.length;
+  captionEl.textContent = scene.captions[step];
+  selectEl.value = String(current);
+  projectButtons.forEach(button => button.setAttribute('aria-current', String(button.dataset.project === scene.project)));
+  [...timeline.children].forEach((button, i) => button.setAttribute('aria-current', i === current ? 'page' : 'false'));
+  stepDots.replaceChildren();
+  scene.captions.forEach((_, i) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.title = '第 ' + (i + 1) + ' 步';
+    button.setAttribute('aria-label', button.title);
+    button.setAttribute('aria-current', i === step ? 'step' : 'false');
+    button.addEventListener('click', () => go(current, i));
+    stepDots.appendChild(button);
+  });
+  prevEl.disabled = current === 0 && step === 0;
+  nextEl.disabled = current === scenes.length - 1 && step === scene.captions.length - 1;
+  if (nextEl.disabled && timer) stopAuto();
+  const hash = '#' + (current + 1) + '.' + (step + 1);
+  if (location.hash !== hash) location.hash = hash;
+}
+function go(scene, nextStep) {
+  current = Math.max(0, Math.min(scenes.length - 1, scene));
+  step = Math.max(0, Math.min(scenes[current].captions.length - 1, nextStep));
+  render();
+}
+function next() {
+  if (step < scenes[current].captions.length - 1) go(current, step + 1);
+  else if (current < scenes.length - 1) go(current + 1, 0);
+  else stopAuto();
+}
+function prev() {
+  if (step > 0) go(current, step - 1);
+  else if (current > 0) go(current - 1, scenes[current - 1].captions.length - 1);
+}
+function stopAuto() {
+  if (timer) clearInterval(timer);
+  timer = null;
+  playEl.textContent = '▶';
+  playEl.title = playEl.ariaLabel = '自动播放';
+  playEl.setAttribute('aria-pressed', 'false');
+}
+function startAuto() {
+  if (nextEl.disabled) go(0, 0);
+  timer = setInterval(next, autoMs);
+  playEl.textContent = 'Ⅱ';
+  playEl.title = playEl.ariaLabel = '暂停播放';
+  playEl.setAttribute('aria-pressed', 'true');
+}
+function fromHash() {
+  const match = location.hash.match(/^#(\d+)\.(\d+)$/);
+  go(match ? Number(match[1]) - 1 : 0, match ? Number(match[2]) - 1 : 0);
+}
+projectButtons.forEach(button => button.addEventListener('click', () => go(scenes.findIndex(scene => scene.project === button.dataset.project), 0)));
+selectEl.addEventListener('change', () => go(Number(selectEl.value), 0));
+prevEl.addEventListener('click', prev);
+nextEl.addEventListener('click', next);
+playEl.addEventListener('click', () => timer ? stopAuto() : startAuto());
+stage.addEventListener('click', event => {
+  if (event.clientX < stage.getBoundingClientRect().left + stage.clientWidth * .2) prev();
+  else next();
+});
+document.addEventListener('keydown', event => {
+  if (event.metaKey || event.ctrlKey || event.altKey || /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
+  if (event.key === ' ' && document.activeElement.tagName === 'BUTTON') return;
+  switch (event.key) {
+    case 'ArrowRight': case ' ': case 'PageDown': event.preventDefault(); next(); break;
+    case 'ArrowLeft': case 'PageUp': event.preventDefault(); prev(); break;
+    case 'Home': event.preventDefault(); go(0, 0); break;
+    case 'End': event.preventDefault(); go(scenes.length - 1, 0); break;
+    case 'a': case 'A': timer ? stopAuto() : startAuto(); break;
+    case 'f': case 'F': document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); break;
+    default:
+      if (/^[0-9]$/.test(event.key)) go(event.key === '0' ? 9 : Number(event.key) - 1, 0);
+  }
+});
+addEventListener('hashchange', fromHash);
+fromHash();
+if (params.get('auto') === '1') startAuto();
+})();
 </script>
-
-    
-<script src="/js/animation.js"></script>
-<script src="/js/highlight.js"></script>
-<script src="/js/image-viewer.js"></script>
-<script src="/js/home-hero.js"></script>
-
-  </body>
+</body>
 </html>
