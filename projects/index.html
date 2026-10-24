@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>项目架构介绍 · Welcome / 加工监控与反控</title>
+<title>项目架构介绍 · 迎宾机器人 / 加工监控与反控</title>
 <style>
   :root { --bg: #101819; --surface: #172124; --line: #344346; --text: #e9f0ed; --muted: #a8b6b4; --accent: #80d5b6; --welcome: #80d5b6; --machining: #f1b67a; }
   * { box-sizing: border-box; }
@@ -257,6 +257,18 @@ scenes.push({
     text(s.svg, 140, 422, '加工监控与反控', { size: 33, weight: 700, fill: C.text });
     text(s.svg, 140, 468, '采集 → 组帧 → 对齐 → 判定 → 反控', { size: 21, fill: '#f1b67a' });
     el('path', { d: 'M70 530 H1210', stroke: '#344346', 'stroke-width': 1 }, s.svg);
+  }
+});
+// 1 Welcome 迎宾机器人开场
+scenes.push({
+  project: 'welcome',
+  title: '开场',
+  captions: [
+    '这是 Welcome 迎宾机器人项目：通过语音、视觉和动作协同，把现场感知转成自然的播报与机器人动作。'
+  ],
+  build(s) {
+    text(s.svg, 640, 250, '迎宾机器人', { size: 76, weight: 700, anchor: 'middle', fill: C.text });
+    text(s.svg, 640, 304, '感知 → 决策 → 表达 / 动作', { size: 26, anchor: 'middle', fill: C.muted });
   }
 });
 // 2 主干
